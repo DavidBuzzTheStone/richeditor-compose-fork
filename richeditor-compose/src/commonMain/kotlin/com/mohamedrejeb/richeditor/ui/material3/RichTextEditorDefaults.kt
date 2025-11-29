@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
@@ -28,10 +29,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.LastBaseline
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults.FilledContainerBox
+import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults.OutlinedBorderContainerBox
+import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults.outlinedRichTextEditorColors
+import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults.outlinedRichTextEditorPadding
+import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults.richTextEditorWithLabelPadding
+import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults.richTextEditorWithoutLabelPadding
 import com.mohamedrejeb.richeditor.ui.material3.tokens.FiledRichTextEditorTokens
 import com.mohamedrejeb.richeditor.ui.material3.tokens.OutlinedRichTextEditorTokens
 
@@ -525,6 +533,7 @@ public object RichTextEditorDefaults {
         supportingText: @Composable (() -> Unit)? = null,
         shape: Shape = filledShape,
         colors: RichTextEditorColors = richTextEditorColors(),
+        modifier: Modifier = Modifier,
         contentPadding: PaddingValues =
             if (label == null) {
                 richTextEditorWithoutLabelPadding()
@@ -551,7 +560,8 @@ public object RichTextEditorDefaults {
             interactionSource = interactionSource,
             colors = colors,
             contentPadding = contentPadding,
-            container = container
+            container = container,
+            modifier = modifier
         )
     }
 

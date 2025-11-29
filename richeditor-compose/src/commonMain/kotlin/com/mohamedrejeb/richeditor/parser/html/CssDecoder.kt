@@ -15,7 +15,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.isUnspecified
 import com.mohamedrejeb.richeditor.parser.utils.MarkBackgroundColor
+import com.mohamedrejeb.richeditor.parser.utils.OverlineBackgroundColor
 import com.mohamedrejeb.richeditor.parser.utils.SmallFontSize
+import com.mohamedrejeb.richeditor.parser.utils.SqrtBackgroundColor
 import com.mohamedrejeb.richeditor.utils.maxDecimals
 import kotlin.math.roundToInt
 
@@ -83,10 +85,12 @@ internal object CssDecoder {
         }
 
         if (spanStyle.background.isSpecified) {
-            if (spanStyle.background == MarkBackgroundColor)
-                htmlTags.add("mark")
-            else
-                cssStyleMap["background"] = decodeColorToCss(spanStyle.background)
+            when (spanStyle.background) {
+                MarkBackgroundColor -> htmlTags.add("mark")
+                SqrtBackgroundColor -> htmlTags.add("sqrt")
+                OverlineBackgroundColor -> htmlTags.add("overline")
+                else -> cssStyleMap["background"] = decodeColorToCss(spanStyle.background)
+            }
         }
 
         spanStyle.textDecoration?.let { textDecoration ->

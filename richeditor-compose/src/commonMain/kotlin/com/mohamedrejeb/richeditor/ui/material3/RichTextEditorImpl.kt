@@ -53,6 +53,7 @@ internal fun CommonDecorationBox(
     interactionSource: InteractionSource,
     contentPadding: PaddingValues,
     colors: RichTextEditorColors,
+    modifier: Modifier = Modifier,
     container: @Composable () -> Unit,
 ) {
     val transformedText = remember(value, visualTransformation) {
@@ -147,7 +148,8 @@ internal fun CommonDecorationBox(
             TextFieldType.Filled -> {
                 val containerWithId: @Composable () -> Unit = {
                     Box(
-                        Modifier.layoutId(ContainerId),
+                        modifier
+                            .layoutId(ContainerId),
                         propagateMinConstraints = true) {
                         container()
                     }
@@ -172,7 +174,7 @@ internal fun CommonDecorationBox(
                 val labelSize = remember { mutableStateOf(Size.Zero) }
                 val borderContainerWithId: @Composable () -> Unit = {
                     Box(
-                        Modifier
+                        modifier
                             .layoutId(ContainerId)
                             .outlineCutout(labelSize.value, contentPadding),
                         propagateMinConstraints = true

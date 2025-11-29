@@ -173,7 +173,7 @@ public fun RichTextEditor(
  */
 @Composable
 @ExperimentalMaterial3Api
-internal fun TextFieldLayout(
+public fun TextFieldLayout(
     modifier: Modifier,
     textField: @Composable () -> Unit,
     label: @Composable (() -> Unit)?,

@@ -3,23 +3,53 @@ package com.mohamedrejeb.richeditor.parser.html
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachIndexed
+import androidx.compose.ui.util.fastForEachReversed
 import com.mohamedrejeb.ksoup.entities.KsoupEntities
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import com.mohamedrejeb.richeditor.annotation.ExperimentalRichTextApi
-import com.mohamedrejeb.richeditor.model.*
+import com.mohamedrejeb.richeditor.model.RichSpan
+import com.mohamedrejeb.richeditor.model.RichSpanStyle
+import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.paragraph.RichParagraph
+import com.mohamedrejeb.richeditor.paragraph.type.ConfigurableListLevel
 import com.mohamedrejeb.richeditor.paragraph.type.DefaultParagraph
 import com.mohamedrejeb.richeditor.paragraph.type.OrderedList
 import com.mohamedrejeb.richeditor.paragraph.type.ParagraphType
 import com.mohamedrejeb.richeditor.paragraph.type.UnorderedList
 import com.mohamedrejeb.richeditor.parser.RichTextStateParser
-import com.mohamedrejeb.richeditor.parser.utils.*
+import com.mohamedrejeb.richeditor.parser.utils.BoldSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.H1SpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.H2SpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.H3SpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.H4SpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.H5SpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.H6SpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.ItalicSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.MarkSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.OverlineSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.SmallSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.SqrtSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.StrikethroughSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.SubscriptSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.SuperscriptSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.UnderlineSpanStyle
 import com.mohamedrejeb.richeditor.utils.customMerge
-import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastForEachIndexed
-import androidx.compose.ui.util.fastForEachReversed
-import com.mohamedrejeb.richeditor.paragraph.type.ConfigurableListLevel
+
+
+public object MathSpacers {
+    public const val Thin: String = "\u2009"       // Current (too thin)
+//    const val Hair = "\u200A"       // Thinner
+//    const val Quarter = "\u2005"    // 1/4 Em (Recommended)
+//    const val Third = "\u2004"      // 1/3 Em (Wide)
+//    const val Figure = "\u2007"     // Width of a number
+//
+//    // Config: Change this one line to swap them all
+//    const val Default = Quarter
+}
+public const val sqrtSpacer: String = "\u2007"
 
 internal object RichTextStateHtmlParser : RichTextStateParser<String> {
 
@@ -42,11 +72,19 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
 
                 if (lastOpenedTag in skippedHtmlElements) return@onText
 
+                val rawText = it
+                // 1. Hide the spacer by replacing it with a placeholder that won't be trimmed. This spacer has an important role in drawing the radical symbol.
+                val placeholder = "@@MATH_GUARD@@"
+                val protectedText = rawText.replace(sqrtSpacer, placeholder)
+
+                val cleanedText = removeHtmlTextExtraSpaces(
+                    input = protectedText,
+                    trimStart = stringBuilder.lastOrNull()?.isWhitespace() == true
+                )
+
+                // 3. Restore the spacer and decode HTML entities
                 val addedText = KsoupEntities.decodeHtml(
-                    removeHtmlTextExtraSpaces(
-                        input = it,
-                        trimStart = stringBuilder.lastOrNull() == null || stringBuilder.lastOrNull()?.isWhitespace() == true || stringBuilder.lastOrNull() == '\n',
-                    )
+                    cleanedText.replace(placeholder, sqrtSpacer)
                 )
 
                 if (addedText.isEmpty()) return@onText
@@ -592,6 +630,8 @@ internal val htmlElementsSpanStyleEncodeMap = mapOf(
     "h4" to H4SpanStyle,
     "h5" to H5SpanStyle,
     "h6" to H6SpanStyle,
+    "sqrt" to SqrtSpanStyle,
+    "overline" to OverlineSpanStyle
 )
 
 /**

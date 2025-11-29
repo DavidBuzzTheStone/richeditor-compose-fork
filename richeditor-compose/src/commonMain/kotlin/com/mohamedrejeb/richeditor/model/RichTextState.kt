@@ -140,14 +140,6 @@ public class RichTextState internal constructor(
         RichSpanStyle.Default::class
     )
 
-    @Deprecated(
-        message = "Use isRichSpan with T or KClass instead",
-        replaceWith = ReplaceWith("isRichSpan<>()"),
-        level = DeprecationLevel.WARNING,
-    )
-    public fun isRichSpan(spanStyle: RichSpanStyle): Boolean =
-        isRichSpan(spanStyle::class)
-
     public inline fun <reified T : RichSpanStyle> isRichSpan(): Boolean =
         isRichSpan(T::class)
 
@@ -4048,7 +4040,7 @@ public class RichTextState internal constructor(
      * @return The html string.
      */
     public fun toHtml(): String {
-        return RichTextStateHtmlParser.decode(this)
+        return RichTextStateHtmlParser.decode(this).cleanMathHtml()
     }
 
     /**
@@ -4094,4 +4086,21 @@ public class RichTextState internal constructor(
             }
         )
     }
+}
+
+/**
+ * Cleans up fragmented Math HTML.
+ * Merges adjacent <sqrt> tags that are separated only by other HTML tags (like <sup>, <small>, etc).
+ * Example: <sqrt>x</sqrt><sup><sqrt>2</sqrt></sup> -> <sqrt>x<sup>2</sup></sqrt>
+ */
+internal fun String.cleanMathHtml(): String {
+    var html = this
+
+    // Correct fragmented Sqrt
+    html = html.replace(Regex("</sqrt>((?:\\s*<[^>]+>\\s*)+)<sqrt>"), "$1")
+
+    // Correct fragmented Overline
+    html = html.replace(Regex("</overline>((?:\\s*<[^>]+>\\s*)+)<overline>"), "$1")
+
+    return html
 }
