@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.em
 
 internal val MarkBackgroundColor = Color.Yellow
 public val SqrtBackgroundColor: Color = Color(0x01000000) // Almost transparent black
-internal val OverlineBackgroundColor = Color(0x02000000)
+public val OverlineBackgroundColor: Color = Color(0x02000000)
 internal val SmallFontSize = 0.8f.em
 
 internal val BoldSpanStyle = SpanStyle(fontWeight = FontWeight.Bold)

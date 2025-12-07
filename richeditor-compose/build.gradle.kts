@@ -55,6 +55,7 @@ kotlin {
         implementation(libs.ksoup.html)
         implementation(libs.ksoup.entities)
 
+
         // Markdown parsing library
         implementation(libs.jetbrains.markdown)
     }

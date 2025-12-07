@@ -183,11 +183,13 @@ public fun MathRichTextEditor(
                     // This Box sits *inside* the padding of the OutlinedTextField.
                     Box(
                         modifier = Modifier
+                            //.fillMaxWidth().border(BorderStroke(2.dp, Color.Red))
                             .drawMathMarkers(
                                 textLayoutResult = layoutResult,
                                 annotatedString = state.annotatedString,
                                 color = defaultColor
-                            )
+                            ),
+                        propagateMinConstraints = true
                     ) {
                         // Layer C: The Actual Text
                         innerTextField()

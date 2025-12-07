@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
@@ -39,6 +40,7 @@ public fun MathRichText(
     onTextLayout: (TextLayoutResult) -> Unit = {},
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
+    color: Color = MaterialTheme.colorScheme.onBackground,
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
@@ -50,10 +52,8 @@ public fun MathRichText(
         mutableStateOf(PointerIcon.Default)
     }
 
-    val defaultColor = MaterialTheme.colorScheme.onBackground
-
     // Merge it into the style for the Editor
-    val mergedTextStyle = style.merge(TextStyle(color = defaultColor))
+    val mergedTextStyle = style.merge(TextStyle(color = color))
 
     var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
@@ -108,7 +108,7 @@ public fun MathRichText(
                 .drawMathMarkers(
                     textLayoutResult = layoutResult,
                     annotatedString = state.annotatedString,
-                    color = defaultColor
+                    color = color
                 )
                 .onPreviewKeyEvent { event ->
                     // Disable Ctrl+Z (Windows/Linux) and Cmd+Z (Mac)

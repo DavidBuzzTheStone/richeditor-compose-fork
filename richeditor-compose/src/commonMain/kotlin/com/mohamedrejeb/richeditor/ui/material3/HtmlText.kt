@@ -3,12 +3,10 @@ package com.mohamedrejeb.richeditor.ui.material3
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.Paragraph
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -22,10 +20,10 @@ import androidx.compose.ui.unit.TextUnit
 import com.mohamedrejeb.richeditor.model.ImageLoader
 import com.mohamedrejeb.richeditor.model.LocalImageLoader
 import com.mohamedrejeb.richeditor.model.RichTextState
-import com.mohamedrejeb.richeditor.ui.BasicRichText
+
 
 /**
- * High-level element that displays rich text and provides semantics / accessibility information.
+ * Convenience function that uses [RichText] but with String input.
  * [RichText] is a convenience wrapper around [Text] and [RichTextState] to allow for rich text.
  *
  * @param state [RichTextState] The rich text to be displayed.
@@ -61,11 +59,10 @@ import com.mohamedrejeb.richeditor.ui.BasicRichText
  * @param style style configuration for the text such as color, font, line height etc.
  */
 @Composable
-public fun RichText(
-    state: RichTextState,
+public fun HtmlText(
+    text: String,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
-    linkColor: Color = MaterialTheme.colorScheme.primary,
     fontSize: TextUnit = TextUnit.Unspecified,
     fontStyle: FontStyle? = null,
     fontWeight: FontWeight? = null,
@@ -82,36 +79,27 @@ public fun RichText(
     style: TextStyle = LocalTextStyle.current,
     imageLoader: ImageLoader = LocalImageLoader.current,
 ) {
-    val textColor = color.takeOrElse {
-        style.color.takeOrElse {
-            LocalContentColor.current
-        }
-    }
-    state.config.linkColor = linkColor
-    // NOTE(text-perf-review): It might be worthwhile writing a bespoke merge implementation that
-    // will avoid reallocating if all of the options here are the defaults
-    val mergedStyle = style.merge(
-        TextStyle(
-            color = textColor,
-            fontSize = fontSize,
-            fontWeight = fontWeight,
-            textAlign = textAlign,
-            lineHeight = lineHeight,
-            fontFamily = fontFamily,
-            textDecoration = textDecoration,
-            fontStyle = fontStyle,
-            letterSpacing = letterSpacing
-        )
-    )
-    BasicRichText(
+    val state = RichTextState()
+    state.setHtml(text)
+
+    RichText(
         state = state,
         modifier = modifier,
-        style = mergedStyle,
-        onTextLayout = onTextLayout,
+        color = color,
+        fontSize = fontSize,
+        fontStyle = fontStyle,
+        fontWeight = fontWeight,
+        fontFamily = fontFamily,
+        letterSpacing = letterSpacing,
+        textDecoration = textDecoration,
+        textAlign = textAlign,
+        lineHeight = lineHeight,
         overflow = overflow,
         softWrap = softWrap,
         maxLines = maxLines,
         inlineContent = inlineContent,
+        onTextLayout = onTextLayout,
+        style = style,
         imageLoader = imageLoader,
     )
 }

@@ -174,11 +174,11 @@ public fun Modifier.drawMathMarkers(
 
             // Draw Geometry (Same as your working version)
             val startBox = textLayoutResult.getBoundingBox(startOffset)
-            val hookStartX = startBox.left + (startBox.right - startBox.left) / 3
-            val valleyX = startBox.right - 2 * strokeWidth
-            val roofStartX = startBox.right - strokeWidth
+            val hookStartX = startBox.left + (startBox.right - startBox.left) / 4
+            val valleyX = startBox.right - strokeWidth * 3
+            val roofStartX = startBox.right - strokeWidth * 2
             val roofY = minTop + (strokeWidth * 0.5f)
-            val hookStartY = baseline - (lineHeight * 0.4f)
+            val hookStartY = baseline - (lineHeight * 0.1f)
             val valleyY = baseline + (lineHeight * 0.05f)
 
             radicalPath.reset()
