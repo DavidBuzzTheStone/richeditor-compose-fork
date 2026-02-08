@@ -1,3 +1,4 @@
+
 import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
@@ -46,10 +47,10 @@ kotlin {
     iosSimulatorArm64()
 
     sourceSets.commonMain.dependencies {
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material)
-        implementation(compose.material3)
+        implementation(libs.runtime)
+        implementation(libs.foundation)
+        implementation(libs.material)
+        implementation(libs.material3)
 
         // HTML parsing library
         implementation(libs.ksoup.html)
@@ -62,12 +63,11 @@ kotlin {
 
     sourceSets.commonTest.dependencies {
         implementation(kotlin("test"))
-        @OptIn(ExperimentalComposeLibrary::class)
-        implementation(compose.uiTest)
+        implementation(libs.ui.test)
     }
 
     sourceSets.named("desktopTest").dependencies {
-        implementation(compose.desktop.uiTestJUnit4)
+        implementation(libs.ui.test.junit4)
         implementation(compose.desktop.currentOs)
     }
 }

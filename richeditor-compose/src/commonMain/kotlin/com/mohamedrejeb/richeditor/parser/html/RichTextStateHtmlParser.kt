@@ -1,5 +1,7 @@
 package com.mohamedrejeb.richeditor.parser.html
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.sp
@@ -28,7 +30,7 @@ import com.mohamedrejeb.richeditor.parser.utils.H4SpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.H5SpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.H6SpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.ItalicSpanStyle
-import com.mohamedrejeb.richeditor.parser.utils.MarkSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.MarkBackgroundColor
 import com.mohamedrejeb.richeditor.parser.utils.OverlineSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.SmallSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.SqrtSpanStyle
@@ -151,8 +153,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                     val paragraphType = encodeHtmlElementToRichParagraphType(lastOpenedTag, currentListLevel)
                     currentRichParagraph.type = paragraphType
 
-                    val cssParagraphStyle = CssEncoder.parseCssStyleMapToParagraphStyle(cssStyleMap, attributes)
-                    currentRichParagraph.paragraphStyle = currentRichParagraph.paragraphStyle.merge(cssParagraphStyle)
+                    currentRichParagraph.paragraphStyle = resolveParagraphStyle(openedTags)
                 }
 
                 if (isCurrentTagBlockElement) {
@@ -166,9 +167,8 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                     if (name == "li" && lastOpenedTag != null) {
                         paragraphType = encodeHtmlElementToRichParagraphType(lastOpenedTag, currentListLevel)
                     }
-                    val cssParagraphStyle = CssEncoder.parseCssStyleMapToParagraphStyle(cssStyleMap, attributes)
 
-                    newRichParagraph.paragraphStyle = newRichParagraph.paragraphStyle.merge(cssParagraphStyle)
+                    newRichParagraph.paragraphStyle = resolveParagraphStyle(openedTags)
                     newRichParagraph.type = paragraphType
 
                     if (!isCurrentRichParagraphBlank) {
@@ -205,11 +205,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                     // name == "br"
                     stringBuilder.append(' ')
 
-                    val newParagraph =
-                        if (richParagraphList.isEmpty())
-                            RichParagraph()
-                        else
-                            RichParagraph(paragraphStyle = richParagraphList.last().paragraphStyle)
+                    val newParagraph = RichParagraph(paragraphStyle = resolveParagraphStyle(openedTags))
 
                     richParagraphList.add(newParagraph)
 
@@ -246,11 +242,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                 if (isCurrentTagBlockElement && !isCurrentRichParagraphBlank) {
                     stringBuilder.append(' ')
 
-                    val newParagraph =
-                        if (richParagraphList.isEmpty())
-                            RichParagraph()
-                        else
-                            RichParagraph(paragraphStyle = richParagraphList.last().paragraphStyle)
+                    val newParagraph = RichParagraph(paragraphStyle = resolveParagraphStyle(openedTags))
 
                     richParagraphList.add(newParagraph)
 
@@ -296,6 +288,25 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
         return RichTextState(
             initialRichParagraphList = richParagraphList,
         )
+    }
+
+    private fun resolveParagraphStyle(openedTags: List<Pair<String, Map<String, String>>>): ParagraphStyle {
+        var paragraphStyle = ParagraphStyle()
+        val isList = openedTags.lastOrNull()?.first == "li"
+        
+        openedTags.fastForEach { (tagName, attributes) ->
+            if (tagName in htmlBlockElements) {
+                val cssStyleMap = attributes["style"]?.let { CssEncoder.parseCssStyle(it) } ?: emptyMap()
+                val cssParagraphStyle = CssEncoder.parseCssStyleMapToParagraphStyle(cssStyleMap, attributes)
+                paragraphStyle = paragraphStyle.merge(cssParagraphStyle)
+            }
+        }
+        
+        if (isList) {
+            paragraphStyle = paragraphStyle.merge(ParagraphStyle(textAlign = androidx.compose.ui.text.style.TextAlign.Start))
+        }
+        
+        return paragraphStyle
     }
 
     override fun decode(richTextState: RichTextState): String {
@@ -541,6 +552,22 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                     contentDescription = attributes["alt"] ?: ""
                 )
 
+            "mark" -> {
+                val style = attributes["style"]
+                val color = if (style != null) {
+                    val cssStyleMap = style.split(";")
+                        .map { it.split(":") }
+                        .filter { it.size == 2 }
+                        .associate { it[0].trim() to it[1].trim() }
+                    
+                    val backgroundColor = cssStyleMap["background-color"] ?: cssStyleMap["background"]
+                    backgroundColor?.let { parseCssColor(it) } ?: MarkBackgroundColor
+                } else {
+                    MarkBackgroundColor
+                }
+                RichSpanStyle.Mark(color = color)
+            }
+
             else ->
                 RichSpanStyle.Default
         }
@@ -572,9 +599,64 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                 else
                     "span" to emptyMap()
 
+            is RichSpanStyle.Mark -> {
+                val color = CssDecoder.decodeColorToCss(richSpanStyle.color)
+                if (color.isNotBlank())
+                    "mark" to mapOf("style" to "background-color: $color")
+                else
+                    "mark" to emptyMap()
+            }
+
             else ->
                 "span" to emptyMap()
         }
+        
+    private fun parseCssColor(colorString: String): Color {
+        return try {
+            if (colorString.startsWith("#")) {
+                val hex = colorString.removePrefix("#")
+                if (hex.length == 6) {
+                    val r = hex.substring(0, 2).toInt(16)
+                    val g = hex.substring(2, 4).toInt(16)
+                    val b = hex.substring(4, 6).toInt(16)
+                    Color(r, g, b)
+                } else if (hex.length == 8) {
+                    val a = hex.substring(0, 2).toInt(16)
+                    val r = hex.substring(2, 4).toInt(16)
+                    val g = hex.substring(4, 6).toInt(16)
+                    val b = hex.substring(6, 8).toInt(16)
+                    Color(r, g, b, a)
+                } else {
+                    MarkBackgroundColor
+                }
+            } else if (colorString.startsWith("rgba")) {
+                val parts = colorString.removePrefix("rgba(").removeSuffix(")").split(",")
+                if (parts.size == 4) {
+                    val r = parts[0].trim().toInt()
+                    val g = parts[1].trim().toInt()
+                    val b = parts[2].trim().toInt()
+                    val a = parts[3].trim().toFloat()
+                    Color(r, g, b, (a * 255).toInt())
+                } else {
+                    MarkBackgroundColor
+                }
+            } else if (colorString.startsWith("rgb")) {
+                val parts = colorString.removePrefix("rgb(").removeSuffix(")").split(",")
+                if (parts.size >= 3) {
+                    val r = parts[0].trim().toInt()
+                    val g = parts[1].trim().toInt()
+                    val b = parts[2].trim().toInt()
+                    Color(r, g, b)
+                } else {
+                    MarkBackgroundColor
+                }
+            } else {
+                MarkBackgroundColor
+            }
+        } catch (e: Exception) {
+            MarkBackgroundColor
+        }
+    }
 
     /**
      * Encodes HTML elements to [ParagraphType].
@@ -622,7 +704,8 @@ internal val htmlElementsSpanStyleEncodeMap = mapOf(
     "del" to StrikethroughSpanStyle,
     "sub" to SubscriptSpanStyle,
     "sup" to SuperscriptSpanStyle,
-    "mark" to MarkSpanStyle,
+    "sup" to SuperscriptSpanStyle,
+    // "mark" to MarkSpanStyle, // Handled by RichSpanStyle
     "small" to SmallSpanStyle,
     "h1" to H1SpanStyle,
     "h2" to H2SpanStyle,
@@ -646,7 +729,8 @@ internal val htmlElementsSpanStyleDecodeMap = mapOf(
     StrikethroughSpanStyle to "s",
     SubscriptSpanStyle to "sub",
     SuperscriptSpanStyle to "sup",
-    MarkSpanStyle to "mark",
+    SuperscriptSpanStyle to "sup",
+    // MarkSpanStyle to "mark", // Handled by RichSpanStyle
     SmallSpanStyle to "small",
     H1SpanStyle to "h1",
     H2SpanStyle to "h2",

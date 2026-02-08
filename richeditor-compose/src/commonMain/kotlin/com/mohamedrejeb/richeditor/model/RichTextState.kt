@@ -726,6 +726,50 @@ public class RichTextState internal constructor(
 
     public fun removeCodeSpan(): Unit = removeRichSpan(RichSpanStyle.Code())
 
+    public fun addMark(color: Color): Unit = addRichSpan(RichSpanStyle.Mark(color))
+
+    public fun addMark(color: Color, textRange: TextRange? = null) {
+        if (textRange == null)
+            addRichSpan(RichSpanStyle.Mark(color))
+        else
+            addRichSpan(RichSpanStyle.Mark(color), textRange)
+    }
+
+    public fun removeMark(color: Color): Unit = removeRichSpan(RichSpanStyle.Mark(color))
+
+    public fun highlight(query: String, color: Color) {
+        val text = textFieldValue.text
+        if (query.isEmpty() || text.isEmpty()) return
+
+        var index = text.indexOf(query, ignoreCase = true)
+        while (index >= 0) {
+            val end = index + query.length
+            addRichSpan(RichSpanStyle.Mark(color), TextRange(index, end))
+            index = text.indexOf(query, index + 1, ignoreCase = true)
+        }
+    }
+
+    public fun clearHighlights() {
+        val toRemove = mutableListOf<RichSpan>()
+        // Helper inner function to traverse
+        fun traverse(span: RichSpan) {
+            if (span.richSpanStyle is RichSpanStyle.Mark) {
+                toRemove.add(span)
+            }
+            span.children.fastForEach { traverse(it) }
+        }
+        richParagraphList.fastForEach { paragraph ->
+            paragraph.children.fastForEach { span ->
+                traverse(span)
+            }
+        }
+
+        toRemove.forEach { span ->
+            val range = span.textRange
+            removeRichSpan(span.richSpanStyle, range)
+        }
+    }
+
     public fun toggleRichSpan(spanStyle: RichSpanStyle) {
         if (isRichSpan(spanStyle::class))
             removeRichSpan(spanStyle)

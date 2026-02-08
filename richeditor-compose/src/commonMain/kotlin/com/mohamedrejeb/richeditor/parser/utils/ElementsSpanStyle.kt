@@ -21,7 +21,6 @@ internal val OverlineSpanStyle = SpanStyle(background = OverlineBackgroundColor)
 
 internal val SubscriptSpanStyle = SpanStyle(baselineShift = BaselineShift.Subscript, fontSize = SmallFontSize)
 internal val SuperscriptSpanStyle = SpanStyle(baselineShift = BaselineShift.Superscript, fontSize = SmallFontSize)
-internal val MarkSpanStyle = SpanStyle(background = MarkBackgroundColor)
 public val SqrtSpanStyle: SpanStyle = SpanStyle(background = SqrtBackgroundColor)
 internal val SmallSpanStyle = SpanStyle(fontSize = SmallFontSize)
 internal val H1SpanStyle = SpanStyle(fontSize = 2.em, fontWeight = FontWeight.Bold)

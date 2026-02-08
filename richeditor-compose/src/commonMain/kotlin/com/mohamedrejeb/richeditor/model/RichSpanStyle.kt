@@ -315,6 +315,38 @@ public interface RichSpanStyle {
             true
     }
 
+    public class Mark(
+        public val color: Color
+    ) : RichSpanStyle {
+        override val spanStyle: (RichTextConfig) -> SpanStyle = {
+            SpanStyle(background = color)
+        }
+
+        override fun DrawScope.drawCustomStyle(
+            layoutResult: TextLayoutResult,
+            textRange: TextRange,
+            richTextConfig: RichTextConfig,
+            topPadding: Float,
+            startPadding: Float,
+        ): Unit = Unit
+
+        override val acceptNewTextInTheEdges: Boolean =
+            true
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is Mark) return false
+
+            if (color != other.color) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return color.hashCode()
+        }
+    }
+
     public companion object {
         internal val DefaultSpanStyle = SpanStyle()
     }
