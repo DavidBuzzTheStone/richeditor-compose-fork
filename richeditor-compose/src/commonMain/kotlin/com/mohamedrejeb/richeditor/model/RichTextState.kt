@@ -1588,7 +1588,7 @@ public class RichTextState internal constructor(
      *
      * @param newTextFieldValue the new text field value.
      */
-    private fun updateTextFieldValue(newTextFieldValue: TextFieldValue = tempTextFieldValue) {
+    internal fun updateTextFieldValue(newTextFieldValue: TextFieldValue = tempTextFieldValue) {
         tempTextFieldValue = newTextFieldValue
 
         if (!singleParagraphMode) {

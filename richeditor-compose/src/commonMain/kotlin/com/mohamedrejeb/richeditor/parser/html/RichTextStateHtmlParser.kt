@@ -81,7 +81,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
 
                 val cleanedText = removeHtmlTextExtraSpaces(
                     input = protectedText,
-                    trimStart = stringBuilder.lastOrNull()?.isWhitespace() == true
+                    trimStart = stringBuilder.lastOrNull() == null || stringBuilder.lastOrNull()?.isWhitespace() == true || stringBuilder.lastOrNull() == '\n'
                 )
 
                 // 3. Restore the spacer and decode HTML entities
@@ -551,6 +551,11 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                     height = (attributes["height"]?.toIntOrNull() ?: 0).sp,
                     contentDescription = attributes["alt"] ?: ""
                 )
+                
+            "inline" ->
+                com.mohamedrejeb.richeditor.model.InlineContentSpanStyle(
+                    id = attributes["id"].orEmpty()
+                )
 
             "mark" -> {
                 val style = attributes["style"]
@@ -598,6 +603,11 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                     )
                 else
                     "span" to emptyMap()
+                    
+            is com.mohamedrejeb.richeditor.model.InlineContentSpanStyle ->
+                "inline" to mapOf(
+                    "id" to richSpanStyle.id
+                )
 
             is RichSpanStyle.Mark -> {
                 val color = CssDecoder.decodeColorToCss(richSpanStyle.color)

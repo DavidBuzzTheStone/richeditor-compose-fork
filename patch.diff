@@ -1,0 +1,47 @@
+--- richeditor-compose/src/commonTest/kotlin/com/mohamedrejeb/richeditor/parser/html/RichTextStateHtmlParserEncodeTest.kt
++++ richeditor-compose/src/commonTest/kotlin/com/mohamedrejeb/richeditor/parser/html/RichTextStateHtmlParserEncodeTest.kt
+@@ -149,15 +149,34 @@
+ 
+     @Test
+     fun testHtmlWithEmptyBlockElements1() {
+-        val html = "<p> dd</p>"
+-        val richTextState = RichTextStateHtmlParser.encode(html)
+-        val p = richTextState.richParagraphList[0]
+-        println("TEST1 P0 isBlank? " + p.isBlank())
+-        println("TEST1 P0 children size: " + p.children.size)
+-        for(i in p.children.indices) {
+-            println("TEST1 Child \$i: '" + p.children[i].text + "'")
+-            println("TEST1 Child \$i isBlank? " + p.children[i].isBlank())
+-            println("TEST1 Child \$i isEmpty? " + p.children[i].isEmpty())
+-        }
++        val html = """
++            <!DOCTYPE html>
++            <html>
++            <body>
++
++            <p><p>dd  dd<span> second</span></p></p>
++
++            </body>
++            </html>
++        """.trimIndent()
++
++        val richTextState = RichTextStateHtmlParser.encode(html)
++
++        assertEquals(1, richTextState.richParagraphList.size)
++        assertEquals("dd dd second", richTextState.annotatedString.text)
++
++        richTextState.setHtml(
++            """
++                <!DOCTYPE html>
++                <html>
++                <body>
++    
++                <p><p><p> second</p></p></p>
++    
++                </body>
++                </html>
++            """.trimIndent()
++        )
+     }
+ 
+     @Test

@@ -13,7 +13,7 @@ internal fun removeHtmlTextExtraSpaces(input: String, trimStart: Boolean = false
         .replace("\\s+".toRegex(), " ")
         .let {
             if (trimStart)
-                it.trimStart()
+                it.trimStart { char -> char == ' ' }
             else
                 it
         }
@@ -25,7 +25,7 @@ internal fun removeHtmlTextExtraSpaces(input: String, trimStart: Boolean = false
  * @see <a href="https://www.w3schools.com/html/html_blocks.asp">HTML blocks</a>
  */
 internal val htmlInlineElements = setOf(
-    "a", "abbr", "acronym", "b", "bdo", "big", "br", "button", "cite", "code", "dfn", "em", "i", "img", "input",
+    "a", "abbr", "acronym", "b", "bdo", "big", "br", "button", "cite", "code", "dfn", "em", "i", "img", "inline", "input",
     "kbd", "label", "map", "object", "q", "samp", "script", "select", "small", "span", "strong", "sub", "sup",
     "textarea", "time", "tt", "var"
 )

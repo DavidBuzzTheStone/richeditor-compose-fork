@@ -162,17 +162,21 @@ internal fun AnnotatedString.Builder.append(
             append(newText)
         }
 
+        val beforeCustomContentLength = this.length
+
         with(richSpan.richSpanStyle) {
             appendCustomContent(
                 richTextState = state
             )
         }
+        
+        val customContentLength = this.length - beforeCustomContentLength
 
         if (richSpan.richSpanStyle !is RichSpanStyle.Default) {
             onStyledRichSpan(richSpan)
         }
 
-        index += richSpan.text.length
+        index += richSpan.text.length + customContentLength
 
         index = appendRichSpan(
             state = state,
@@ -233,6 +237,7 @@ internal fun AnnotatedString.Builder.append(
             )
             append(selectedText)
         }
+        
         index += richSpan.text.length
         richSpan.children.fastForEach { richSpan ->
             index = append(
@@ -282,17 +287,22 @@ internal fun AnnotatedString.Builder.append(
     withStyle(richSpan.spanStyle.merge(richSpan.richSpanStyle.spanStyle(state.config))) {
         richSpan.textRange = TextRange(index, index + richSpan.text.length)
         append(richSpan.text)
+        
+        val beforeCustomContentLength = this.length
+        
         with(richSpan.richSpanStyle) {
             appendCustomContent(
                 richTextState = state,
             )
         }
+        
+        val customContentLength = this.length - beforeCustomContentLength
 
         if (richSpan.richSpanStyle !is RichSpanStyle.Default) {
             onStyledRichSpan(richSpan)
         }
 
-        index += richSpan.text.length
+        index += richSpan.text.length + customContentLength
         richSpan.children.fastForEach { richSpan ->
             index = append(
                 state = state,
