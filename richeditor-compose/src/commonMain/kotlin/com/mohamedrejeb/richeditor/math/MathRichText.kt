@@ -41,6 +41,7 @@ public fun MathRichText(
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     color: Color = MaterialTheme.colorScheme.onBackground,
+    linkColor: Color = MaterialTheme.colorScheme.tertiary,
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
@@ -51,6 +52,8 @@ public fun MathRichText(
     val pointerIcon = remember {
         mutableStateOf(PointerIcon.Default)
     }
+
+    state.config.linkColor = linkColor
 
     // Merge it into the style for the Editor
     val mergedTextStyle = style.merge(TextStyle(color = color))

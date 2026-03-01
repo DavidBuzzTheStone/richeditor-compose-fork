@@ -65,7 +65,7 @@ public fun RichText(
     state: RichTextState,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
-    linkColor: Color = MaterialTheme.colorScheme.primary,
+    linkColor: Color = MaterialTheme.colorScheme.tertiary,
     fontSize: TextUnit = TextUnit.Unspecified,
     fontStyle: FontStyle? = null,
     fontWeight: FontWeight? = null,
