@@ -29,8 +29,8 @@ include(
     ":richeditor-compose",
     ":richeditor-compose-coil3",
 
-    ":sample:android",
-    ":sample:desktop",
-    ":sample:web",
-    ":sample:common",
+//    ":sample:android",
+//    ":sample:desktop",
+//    ":sample:web",
+//    ":sample:common",
 )
