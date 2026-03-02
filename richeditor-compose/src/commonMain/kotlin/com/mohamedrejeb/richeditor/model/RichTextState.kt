@@ -792,6 +792,7 @@ public class RichTextState internal constructor(
         toRemove.forEach { span ->
             val range = span.textRange
             removeRichSpan(span.richSpanStyle, range)
+            removeSpanStyle(SpanStyle(color = span.spanStyle.color), range)
         }
     }
 
