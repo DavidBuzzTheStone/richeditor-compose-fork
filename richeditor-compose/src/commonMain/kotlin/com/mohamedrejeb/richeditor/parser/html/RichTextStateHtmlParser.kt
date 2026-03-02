@@ -505,7 +505,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
         }
 
         // Append text
-        stringBuilder.append(KsoupEntities.encodeHtml(richSpan.text))
+        stringBuilder.append(richSpan.text.escapeHtmlEntities())
 
         // Append children
         richSpan.children.fastForEach { child ->
@@ -752,3 +752,11 @@ internal val htmlElementsSpanStyleDecodeMap = mapOf(
 
 internal const val CodeSpanTagName = "code"
 internal const val OldCodeSpanTagName = "code-span"
+
+private fun String.escapeHtmlEntities(): String {
+    return this.replace("&", "&amp;")
+               .replace("<", "&lt;")
+               .replace(">", "&gt;")
+               .replace("\"", "&quot;")
+               .replace("'", "&#39;")
+}
