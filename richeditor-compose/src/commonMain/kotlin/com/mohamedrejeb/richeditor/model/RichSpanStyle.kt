@@ -316,10 +316,14 @@ public interface RichSpanStyle {
     }
 
     public class Mark(
-        public val color: Color
+        public val color: Color,
+        public val textColor: Color = Color.Unspecified
     ) : RichSpanStyle {
         override val spanStyle: (RichTextConfig) -> SpanStyle = {
-            SpanStyle(background = color)
+            SpanStyle(
+                background = color,
+                color = textColor
+            )
         }
 
         override fun DrawScope.drawCustomStyle(
@@ -338,12 +342,15 @@ public interface RichSpanStyle {
             if (other !is Mark) return false
 
             if (color != other.color) return false
+            if (textColor != other.textColor) return false
 
             return true
         }
 
         override fun hashCode(): Int {
-            return color.hashCode()
+            var result = color.hashCode()
+            result = 31 * result + textColor.hashCode()
+            return result
         }
     }
 

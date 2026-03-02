@@ -769,8 +769,7 @@ public class RichTextState internal constructor(
         var index = text.indexOf(query, ignoreCase = true)
         while (index >= 0) {
             val end = index + query.length
-            addRichSpan(RichSpanStyle.Mark(highlightColor), TextRange(index, end))
-            addSpanStyle(SpanStyle(color = textColor), TextRange(index, end))
+            addRichSpan(RichSpanStyle.Mark(highlightColor, textColor), TextRange(index, end))
             index = text.indexOf(query, index + 1, ignoreCase = true)
         }
     }
