@@ -2825,7 +2825,7 @@ public class RichTextState internal constructor(
             }
 
             // Remove empty RichSpan.
-            if (previousRichSpan?.isEmpty() == true) {
+            if (previousRichSpan?.isEmpty() == true && index != -1) {
                 richSpan.paragraph.children.removeAt(index)
             }
         } else {
@@ -2838,7 +2838,7 @@ public class RichTextState internal constructor(
             }
 
             // Remove empty RichSpan.
-            if (previousRichSpan?.isEmpty() == true) {
+            if (previousRichSpan?.isEmpty() == true && index != -1) {
                 parentRichSpan.children.removeAt(index)
             }
         }

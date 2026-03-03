@@ -62,7 +62,11 @@ public fun MathRichTextEditor(
     // 1. RESOLVE THE CORRECT THEME COLOR
     // 'LocalContentColor' matches your Theme (White in Dark Mode, Black in Light Mode).
     // We use it as the default if 'textStyle.color' is Unspecified.
-    val defaultColor = MaterialTheme.colorScheme.onBackground
+    val defaultColor = if (textStyle.color == Color.Unspecified) {
+        MaterialTheme.colorScheme.onBackground
+    } else {
+        textStyle.color
+    }
 
     // Merge it into the style for the Editor
     val mergedTextStyle = textStyle.merge(TextStyle(color = defaultColor))

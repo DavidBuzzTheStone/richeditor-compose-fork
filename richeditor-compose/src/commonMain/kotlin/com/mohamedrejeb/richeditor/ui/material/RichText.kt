@@ -23,6 +23,7 @@ import com.mohamedrejeb.richeditor.model.ImageLoader
 import com.mohamedrejeb.richeditor.model.LocalImageLoader
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.ui.BasicRichText
+import androidx.compose.ui.text.input.VisualTransformation
 
 /**
  * High-level element that displays rich text and provides semantics / accessibility information.
@@ -61,6 +62,7 @@ import com.mohamedrejeb.richeditor.ui.BasicRichText
  * text, baselines and other details. The callback can be used to add additional decoration or
  * functionality to the text. For example, to draw selection around the text.
  * @param style Style configuration for the text such as color, font, line height etc.
+ * @param visualTransformation The visual transformation filter for changing the visual representation of the input.
  */
 @Composable
 public fun RichText(
@@ -82,6 +84,7 @@ public fun RichText(
     inlineContent: Map<String, InlineTextContent> = mapOf(),
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
+    visualTransformation: VisualTransformation? = null,
     imageLoader: ImageLoader = LocalImageLoader.current,
 ) {
     val textColor = color.takeOrElse {
@@ -114,6 +117,7 @@ public fun RichText(
         maxLines = maxLines,
         minLines = minLines,
         inlineContent = inlineContent,
+        visualTransformation = visualTransformation,
         imageLoader = imageLoader,
     )
 }

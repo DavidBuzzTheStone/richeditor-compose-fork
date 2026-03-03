@@ -20,6 +20,7 @@ import com.mohamedrejeb.richeditor.gesture.detectTapGestures
 import com.mohamedrejeb.richeditor.model.ImageLoader
 import com.mohamedrejeb.richeditor.model.LocalImageLoader
 import com.mohamedrejeb.richeditor.model.RichTextState
+import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
 public fun BasicRichText(
@@ -32,6 +33,7 @@ public fun BasicRichText(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
+    visualTransformation: VisualTransformation? = null,
     imageLoader: ImageLoader = LocalImageLoader.current,
 ) {
     val density = LocalDensity.current
@@ -42,9 +44,11 @@ public fun BasicRichText(
 
     val text = remember(
         state.visualTransformation,
+        visualTransformation,
         state.annotatedString,
     ) {
-        state.visualTransformation.filter(state.annotatedString).text
+        val activeTransformation = visualTransformation ?: state.visualTransformation
+        activeTransformation.filter(state.annotatedString).text
     }
 
     CompositionLocalProvider(
