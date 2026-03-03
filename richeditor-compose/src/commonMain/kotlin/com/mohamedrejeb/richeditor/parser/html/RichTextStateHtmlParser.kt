@@ -38,6 +38,7 @@ import com.mohamedrejeb.richeditor.parser.utils.StrikethroughSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.SubscriptSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.SuperscriptSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.UnderlineSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.DoubleUnderScoreSpanStyle
 import com.mohamedrejeb.richeditor.utils.customMerge
 
 
@@ -724,7 +725,8 @@ internal val htmlElementsSpanStyleEncodeMap = mapOf(
     "h5" to H5SpanStyle,
     "h6" to H6SpanStyle,
     "sqrt" to SqrtSpanStyle,
-    "overline" to OverlineSpanStyle
+    "overline" to OverlineSpanStyle,
+    "double-u" to DoubleUnderScoreSpanStyle
 )
 
 /**

@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.isUnspecified
+import com.mohamedrejeb.richeditor.parser.utils.DoubleUnderScoreBackgroundColor
 import com.mohamedrejeb.richeditor.parser.utils.MarkBackgroundColor
 import com.mohamedrejeb.richeditor.parser.utils.OverlineBackgroundColor
 import com.mohamedrejeb.richeditor.parser.utils.SmallFontSize
@@ -89,6 +90,7 @@ internal object CssDecoder {
                 MarkBackgroundColor -> htmlTags.add("mark")
                 SqrtBackgroundColor -> htmlTags.add("sqrt")
                 OverlineBackgroundColor -> htmlTags.add("overline")
+                DoubleUnderScoreBackgroundColor -> htmlTags.add("double-u")
                 else -> cssStyleMap["background"] = decodeColorToCss(spanStyle.background)
             }
         }
