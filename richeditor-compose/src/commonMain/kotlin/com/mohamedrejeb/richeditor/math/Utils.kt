@@ -7,6 +7,8 @@ import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.parser.utils.OverlineBackgroundColor
 import com.mohamedrejeb.richeditor.parser.utils.OverlineSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.SqrtBackgroundColor
+import com.mohamedrejeb.richeditor.parser.utils.DoubleUnderScoreBackgroundColor
+import com.mohamedrejeb.richeditor.parser.utils.DoubleUnderScoreSpanStyle
 
 // In your Utils file
 
@@ -50,6 +52,14 @@ public fun SpanStyle.isOverlineMarker(): Boolean {
     return this.background == OverlineBackgroundColor
 }
 
+public fun SpanStyle.isDoubleUnderScoreMarker(): Boolean {
+    return this.background == DoubleUnderScoreBackgroundColor
+}
+
 public fun RichTextState.toggleOverline() { //TODO: This doesn't work on non-empty selections (it just toggles after the selection)
     this.toggleSpanStyle(OverlineSpanStyle)
+}
+
+public fun RichTextState.toggleDoubleUnderScore() {
+    this.toggleSpanStyle(DoubleUnderScoreSpanStyle)
 }

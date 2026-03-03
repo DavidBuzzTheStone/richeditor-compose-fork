@@ -1417,6 +1417,20 @@ public class RichTextState internal constructor(
         if (event.type != KeyEventType.KeyDown)
             return false
 
+        if (event.key == Key.Enter && event.isShiftPressed) {
+            val selection = textFieldValue.selection
+            if (!selection.collapsed) return false
+            
+            val newText = textFieldValue.text.replaceRange(
+                selection.min, selection.max, "\u2028"
+            )
+            val newSelection = TextRange(selection.min + 1)
+            onTextFieldValueChange(
+                TextFieldValue(text = newText, selection = newSelection)
+            )
+            return true
+        }
+
         if (event.key != Key.Tab)
             return false
 

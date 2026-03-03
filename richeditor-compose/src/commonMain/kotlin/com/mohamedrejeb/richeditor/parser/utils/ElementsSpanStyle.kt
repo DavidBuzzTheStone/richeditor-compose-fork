@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.em
 internal val MarkBackgroundColor = Color.Yellow
 public val SqrtBackgroundColor: Color = Color(0x01000000) // Almost transparent black
 public val OverlineBackgroundColor: Color = Color(0x02000000)
+public val DoubleUnderScoreBackgroundColor: Color = Color(0x03000000)
 internal val SmallFontSize = 0.8f.em
 
 internal val BoldSpanStyle = SpanStyle(fontWeight = FontWeight.Bold)
@@ -18,6 +19,7 @@ internal val ItalicSpanStyle = SpanStyle(fontStyle = FontStyle.Italic)
 internal val UnderlineSpanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
 internal val StrikethroughSpanStyle = SpanStyle(textDecoration = TextDecoration.LineThrough)
 internal val OverlineSpanStyle = SpanStyle(background = OverlineBackgroundColor)
+internal val DoubleUnderScoreSpanStyle = SpanStyle(background = DoubleUnderScoreBackgroundColor)
 
 internal val SubscriptSpanStyle = SpanStyle(baselineShift = BaselineShift.Subscript, fontSize = SmallFontSize)
 internal val SuperscriptSpanStyle = SpanStyle(baselineShift = BaselineShift.Superscript, fontSize = SmallFontSize)

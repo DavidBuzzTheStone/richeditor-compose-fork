@@ -38,6 +38,7 @@ import com.mohamedrejeb.richeditor.parser.utils.StrikethroughSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.SubscriptSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.SuperscriptSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.UnderlineSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.DoubleUnderScoreSpanStyle
 import com.mohamedrejeb.richeditor.utils.customMerge
 
 
@@ -75,6 +76,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                 if (lastOpenedTag in skippedHtmlElements) return@onText
 
                 val rawText = it
+                println("ON TEXT CALLED WITH rawText='$rawText'")
                 // 1. Hide the spacer by replacing it with a placeholder that won't be trimmed. This spacer has an important role in drawing the radical symbol.
                 val placeholder = "@@MATH_GUARD@@"
                 val protectedText = rawText.replace(sqrtSpacer, placeholder)
@@ -203,34 +205,21 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                     currentRichSpan = newRichSpan
                 } else {
                     // name == "br"
-                    stringBuilder.append(' ')
+                    stringBuilder.append('\u2028')
+                    
+                    val currentRichParagraph = richParagraphList.last()
+                    val newRichSpan = RichSpan(paragraph = currentRichParagraph, text = "\u2028")
 
-                    val newParagraph = RichParagraph(paragraphStyle = resolveParagraphStyle(openedTags))
-
-                    richParagraphList.add(newParagraph)
-
-                    if (richParagraphList.lastIndex > 0)
-                        lineBreakParagraphIndexSet.add(richParagraphList.lastIndex - 1)
-
-                    lineBreakParagraphIndexSet.add(richParagraphList.lastIndex)
-
-                    // Keep the same style when having a line break in the middle of a paragraph,
-                    // Ex: <h1>Hello<br>World!</h1>
-                    if (isLastOpenedTagBlockElement && !isCurrentRichParagraphBlank)
-                        currentRichSpan?.let { richSpan ->
-                            val newRichSpan = richSpan.copy(
-                                text = "",
-                                textRange = TextRange.Zero,
-                                paragraph = newParagraph,
-                                children = mutableListOf(),
-                            )
-
-                            newParagraph.children.add(newRichSpan)
-
-                            currentRichSpan = newRichSpan
-                        }
-                    else
-                        currentRichSpan = null
+                    if (currentRichSpan != null) {
+                        newRichSpan.parent = currentRichSpan
+                        currentRichSpan?.children?.add(newRichSpan)
+                    } else {
+                        currentRichParagraph.children.add(newRichSpan)
+                    }
+                    
+                    if (currentRichParagraph.children.size == 1 && currentRichSpan == null) {
+                        lineBreakParagraphIndexSet.add(richParagraphList.lastIndex)
+                    }
                 }
             }
             .onCloseTag { name, _ ->
@@ -427,7 +416,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                     isLastParagraphEmpty && richParagraph.isEmpty() && index == richTextState.richParagraphList.lastIndex
 
                 if (!skipAddingBr)
-                    builder.append("<$BrElement>")
+                    builder.append("<p><$BrElement /></p>")
             } else {
                 // Create paragraph tag name
                 val paragraphTagName =
@@ -445,7 +434,11 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
 
                 // Append paragraph children
                 richParagraph.children.fastForEach { richSpan ->
-                    builder.append(decodeRichSpanToHtml(richSpan))
+                    if (richSpan.text == "\u2028") {
+                        builder.append("<$BrElement />")
+                    } else {
+                        builder.append(decodeRichSpanToHtml(richSpan))
+                    }
                 }
 
                 // Append paragraph closing tag
@@ -505,7 +498,9 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
         }
 
         // Append text
-        stringBuilder.append(richSpan.text.escapeHtmlEntities())
+        stringBuilder.append(
+            richSpan.text.escapeHtmlEntities().replace("\u2028", "<br />")
+        )
 
         // Append children
         richSpan.children.fastForEach { child ->
@@ -724,7 +719,8 @@ internal val htmlElementsSpanStyleEncodeMap = mapOf(
     "h5" to H5SpanStyle,
     "h6" to H6SpanStyle,
     "sqrt" to SqrtSpanStyle,
-    "overline" to OverlineSpanStyle
+    "overline" to OverlineSpanStyle,
+    "double-u" to DoubleUnderScoreSpanStyle
 )
 
 /**

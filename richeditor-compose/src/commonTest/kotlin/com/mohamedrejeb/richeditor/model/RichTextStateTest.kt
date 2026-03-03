@@ -2834,11 +2834,10 @@ class RichTextStateTest {
 
         richTextState.insertHtml("<br><p>New1</p><p>New2</p>", 5)
 
-        assertEquals(4, richTextState.richParagraphList.size)
-        assertEquals("First", richTextState.richParagraphList[0].children[0].text)
-        assertEquals("New1", richTextState.richParagraphList[1].children[0].text)
-        assertEquals("New2", richTextState.richParagraphList[2].children[0].text)
-        assertEquals("Last", richTextState.richParagraphList[3].children[0].text)
+        assertEquals(3, richTextState.richParagraphList.size)
+        assertEquals("First\u2028New1", richTextState.richParagraphList[0].children[0].text)
+        assertEquals("New2", richTextState.richParagraphList[1].children[0].text)
+        assertEquals("Last", richTextState.richParagraphList[2].children[0].text)
     }
 
     @OptIn(ExperimentalRichTextApi::class)

@@ -453,7 +453,7 @@ internal object RichTextStateMarkdownParser : RichTextStateParser<String> {
         val spanMarkdown = decodeMarkdownElementFromRichSpan(richSpan.text, richSpan.richSpanStyle)
 
         // Append text
-        stringBuilder.append(spanMarkdown)
+        stringBuilder.append(spanMarkdown.replace("\u2028", "  \n"))
 
         // Append children
         richSpan.children.fastForEach { child ->

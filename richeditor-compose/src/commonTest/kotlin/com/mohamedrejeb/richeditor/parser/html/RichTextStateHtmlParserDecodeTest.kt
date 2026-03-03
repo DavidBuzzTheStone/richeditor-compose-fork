@@ -20,18 +20,25 @@ class RichTextStateHtmlParserDecodeTest {
 
         val richTextState = RichTextStateHtmlParser.encode(html)
 
-        assertEquals(2, richTextState.richParagraphList.size)
-        assertTrue(richTextState.richParagraphList[0].isBlank())
-        assertEquals(1, richTextState.richParagraphList[1].children.size)
+        println("DECODED PARAGRAPHS SIZE: " + richTextState.richParagraphList.size)
+        richTextState.richParagraphList.forEachIndexed { i, p ->
+            println("PARAGRAPH $i: '${p.getTextRange()}', children_size=${p.children.size}")
+            p.children.forEachIndexed { j, c ->
+                println("  CHILD $j: '${c.text}', style=${c.richSpanStyle}")
+            }
+        }
+        assertEquals(1, richTextState.richParagraphList.size)
+        assertEquals(1, richTextState.richParagraphList[0].children.size)
+        assertEquals("\u2028Hello World!", richTextState.richParagraphList[0].children[0].text)
 
         val parsedHtml = RichTextStateHtmlParser.decode(richTextState)
 
-        assertEquals(html, parsedHtml)
+        assertEquals("<p><br />Hello World!</p>", parsedHtml)
     }
 
     @Test
     fun testDecodeSingleLineBreak() {
-        val expectedHtml = "<p>First</p><br><p>Second</p>"
+        val expectedHtml = "<p>First<br />Second</p>"
 
         val richTextState = RichTextState(
             listOf(
@@ -44,20 +51,12 @@ class RichTextStateHtmlParserDecodeTest {
                             paragraph = it,
                         )
                     )
-                },
-                RichParagraph(
-                    type = DefaultParagraph()
-                ).also {
                     it.children.add(
                         RichSpan(
-                            text = "",
+                            text = "\u2028",
                             paragraph = it,
                         )
                     )
-                },
-                RichParagraph(
-                    type = DefaultParagraph()
-                ).also {
                     it.children.add(
                         RichSpan(
                             text = "Second",
@@ -73,7 +72,7 @@ class RichTextStateHtmlParserDecodeTest {
 
     @Test
     fun testDecodeMultipleLineBreaks() {
-        val expectedHtml = "<br><p>First</p><br><br><p>Second</p><br>"
+        val expectedHtml = "<p><br /></p><p>First</p><p><br /><br /></p><p>Second<br /></p>"
 
         val richTextState = RichTextState(
             listOf(
@@ -82,7 +81,7 @@ class RichTextStateHtmlParserDecodeTest {
                 ).also {
                     it.children.add(
                         RichSpan(
-                            text = "",
+                            text = "\u2028",
                             paragraph = it,
                         )
                     )
@@ -102,17 +101,13 @@ class RichTextStateHtmlParserDecodeTest {
                 ).also {
                     it.children.add(
                         RichSpan(
-                            text = "",
+                            text = "\u2028",
                             paragraph = it,
                         )
                     )
-                },
-                RichParagraph(
-                    type = DefaultParagraph()
-                ).also {
                     it.children.add(
                         RichSpan(
-                            text = "",
+                            text = "\u2028",
                             paragraph = it,
                         )
                     )
@@ -126,13 +121,9 @@ class RichTextStateHtmlParserDecodeTest {
                             paragraph = it,
                         )
                     )
-                },
-                RichParagraph(
-                    type = DefaultParagraph()
-                ).also {
                     it.children.add(
                         RichSpan(
-                            text = "",
+                            text = "\u2028",
                             paragraph = it,
                         )
                     )
@@ -488,7 +479,7 @@ class RichTextStateHtmlParserDecodeTest {
 
     @Test
     fun testDecodeInlineContent() {
-        val expectedHtml = "<p>Here is an </p><inline id=\"badge-1\"></inline><p> inside text.</p>"
+        val expectedHtml = "<p>Here is an <inline id=\"badge-1\"></inline> inside text.</p>"
 
         val richTextState = RichTextState(
             listOf(
@@ -501,10 +492,6 @@ class RichTextStateHtmlParserDecodeTest {
                             paragraph = it,
                         )
                     )
-                },
-                RichParagraph(
-                    type = DefaultParagraph()
-                ).also {
                     it.children.add(
                         RichSpan(
                             text = "",
@@ -512,10 +499,6 @@ class RichTextStateHtmlParserDecodeTest {
                             paragraph = it,
                         )
                     )
-                },
-                RichParagraph(
-                    type = DefaultParagraph()
-                ).also {
                     it.children.add(
                         RichSpan(
                             text = " inside text.",

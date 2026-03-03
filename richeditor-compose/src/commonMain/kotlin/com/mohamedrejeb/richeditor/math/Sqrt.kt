@@ -135,6 +135,48 @@ public fun Modifier.drawMathMarkers(
     }
 
     // =================================================
+    // 1.5 DRAW DOUBLE UNDERSCORES
+    // =================================================
+    val doubleUnderScoreRanges = annotatedString.spanStyles.mergeRanges { it.isDoubleUnderScoreMarker() }
+
+    doubleUnderScoreRanges.forEach { range ->
+        try {
+            val startOffset = range.start
+            val endOffset = range.end
+            if (startOffset >= endOffset) return@forEach
+
+            val lineIndex = textLayoutResult.getLineForOffset(startOffset)
+            val baseline = textLayoutResult.getLineBaseline(lineIndex)
+
+            // Geometry
+            val startBox = textLayoutResult.getBoundingBox(startOffset)
+            val endBox = textLayoutResult.getBoundingBox(endOffset - 1) // -1 because end is exclusive
+
+            val lineStartX = startBox.left
+            val lineEndX = endBox.right
+            
+            val line1Y = baseline + strokeWidth * 1.5f
+            val line2Y = baseline + strokeWidth * 3.5f
+
+            drawLine(
+                color = color,
+                start = Offset(lineStartX, line1Y),
+                end = Offset(lineEndX, line1Y),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+            drawLine(
+                color = color,
+                start = Offset(lineStartX, line2Y),
+                end = Offset(lineEndX, line2Y),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+
+        } catch (e: Exception) { }
+    }
+
+    // =================================================
     // 2. DRAW SQUARE ROOTS (Your existing logic)
     // =================================================
     val sqrtRanges = annotatedString.spanStyles.mergeRanges { it.isSqrtMarker() }
