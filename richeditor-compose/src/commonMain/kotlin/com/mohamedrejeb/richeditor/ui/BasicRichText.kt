@@ -47,8 +47,8 @@ public fun BasicRichText(
         visualTransformation,
         state.annotatedString,
     ) {
-        val activeTransformation = visualTransformation ?: state.visualTransformation
-        activeTransformation.filter(state.annotatedString).text
+        val baseTransformed = state.visualTransformation.filter(state.annotatedString).text
+        visualTransformation?.filter(baseTransformed)?.text ?: baseTransformed
     }
 
     CompositionLocalProvider(

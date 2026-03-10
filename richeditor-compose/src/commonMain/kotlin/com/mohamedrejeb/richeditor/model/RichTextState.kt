@@ -1732,9 +1732,10 @@ public class RichTextState internal constructor(
 
         styledRichSpanList.clear()
         textFieldValue = newTextFieldValue.copy(text = annotatedString.text)
+        val visualString = annotatedString.replace('\u2028', '\n')
         visualTransformation = VisualTransformation { _ ->
             TransformedText(
-                text = annotatedString,
+                text = visualString,
                 offsetMapping = OffsetMapping.Identity
             )
         }
@@ -4028,9 +4029,10 @@ public class RichTextState internal constructor(
             text = annotatedString.text,
             selection = TextRange(selectionIndex),
         )
+        val visualString = annotatedString.replace('\u2028', '\n')
         visualTransformation = VisualTransformation { _ ->
             TransformedText(
-                text = annotatedString,
+                text = visualString,
                 offsetMapping = OffsetMapping.Identity
             )
         }
@@ -4187,4 +4189,20 @@ internal fun String.cleanMathHtml(): String {
     html = html.replace(Regex("</overline>((?:\\s*<[^>]+>\\s*)+)<overline>"), "$1")
 
     return html
+}
+
+private fun AnnotatedString.replace(oldChar: Char, newChar: Char): AnnotatedString {
+    if (!text.contains(oldChar)) return this
+    val newText = text.replace(oldChar, newChar)
+    val builder = AnnotatedString.Builder(newText)
+    for (span in spanStyles) {
+        builder.addStyle(span.item, span.start, span.end)
+    }
+    for (paragraph in paragraphStyles) {
+        builder.addStyle(paragraph.item, paragraph.start, paragraph.end)
+    }
+    for (annotation in getStringAnnotations(0, text.length)) {
+        builder.addStringAnnotation(annotation.tag, annotation.item, annotation.start, annotation.end)
+    }
+    return builder.toAnnotatedString()
 }
