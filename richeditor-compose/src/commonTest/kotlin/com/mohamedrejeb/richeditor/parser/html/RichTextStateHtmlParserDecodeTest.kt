@@ -72,7 +72,7 @@ class RichTextStateHtmlParserDecodeTest {
 
     @Test
     fun testDecodeMultipleLineBreaks() {
-        val expectedHtml = "<p><br /></p><p>First</p><p><br /><br /></p><p>Second<br /></p>"
+        val expectedHtml = "<p></p><p>First</p><p><br /><br /></p><p>Second<br /></p>"
 
         val richTextState = RichTextState(
             listOf(

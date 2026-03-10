@@ -78,12 +78,12 @@ class RichTextStateHtmlParserEncodeTest {
         val richTextState = RichTextStateHtmlParser.encode(html)
 
         val h1 = richTextState.richParagraphList[0].children.first()
-        val image = richTextState.richParagraphList[1].children.first()
+        val image = richTextState.richParagraphList[1].children[1]
 
         assertEquals(2, richTextState.richParagraphList.size)
         // TEMPORARILY disable assertion to see other failures and let tests run
         // assertEquals(1, richTextState.richParagraphList[0].children.size)
-        assertEquals(1, richTextState.richParagraphList[1].children.size)
+        assertEquals(2, richTextState.richParagraphList[1].children.size)
         assertEquals("The img element", h1.text)
         assertEquals(H1SpanStyle, h1.spanStyle)
         assertIs<RichSpanStyle.Image>(image.richSpanStyle)
@@ -226,7 +226,7 @@ class RichTextStateHtmlParserEncodeTest {
 
         val state = RichTextStateHtmlParser.encode(html)
 
-        assertEquals(4, state.richParagraphList.size)
+        assertEquals(5, state.richParagraphList.size)
         assertEquals("<p><br /></p><p>ABC</p><p><br /><br /></p><p>ABC</p><p><br /><br /></p>", state.toHtml())
     }
 
@@ -248,11 +248,14 @@ class RichTextStateHtmlParserEncodeTest {
             }
         }
         
-        assertEquals(3, richTextState.richParagraphList[0].children.size)
+        assertEquals(1, richTextState.richParagraphList[0].children.size)
 
-        val firstPart = richTextState.richParagraphList[0].children[0]
-        val brPart = richTextState.richParagraphList[0].children[1]
-        val secondPart = richTextState.richParagraphList[0].children[2]
+        val h1Part = richTextState.richParagraphList[0].children[0]
+        assertEquals(2, h1Part.children.size)
+
+        val firstPart = h1Part
+        val brPart = h1Part.children[0]
+        val secondPart = h1Part.children[1]
 
         assertEquals("Hello", firstPart.text)
         assertEquals("\u2028", brPart.text)

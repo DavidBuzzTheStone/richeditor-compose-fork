@@ -81,15 +81,25 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                 val placeholder = "@@MATH_GUARD@@"
                 val protectedText = rawText.replace(sqrtSpacer, placeholder)
 
-                val cleanedText = removeHtmlTextExtraSpaces(
-                    input = protectedText,
-                    trimStart = stringBuilder.lastOrNull() == null || stringBuilder.lastOrNull()?.isWhitespace() == true || stringBuilder.lastOrNull() == '\n'
-                )
+                val isInsidePre = openedTags.any { it.first == "pre" }
+
+                val cleanedText = if (isInsidePre) {
+                    protectedText
+                } else {
+                    removeHtmlTextExtraSpaces(
+                        input = protectedText,
+                        trimStart = stringBuilder.lastOrNull() == null || stringBuilder.lastOrNull()?.isWhitespace() == true || stringBuilder.lastOrNull() == '\n'
+                    )
+                }
 
                 // 3. Restore the spacer and decode HTML entities
-                val addedText = KsoupEntities.decodeHtml(
+                var addedText = KsoupEntities.decodeHtml(
                     cleanedText.replace(placeholder, sqrtSpacer)
                 )
+
+                if (isInsidePre) {
+                    addedText = addedText.replace("\n", "\u2028")
+                }
 
                 if (addedText.isEmpty()) return@onText
 
@@ -225,17 +235,32 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
             .onCloseTag { name, _ ->
                 openedTags.removeLastOrNull()
 
-                val isCurrentRichParagraphBlank = richParagraphList.lastOrNull()?.isBlank() == true
                 val isCurrentTagBlockElement = name in htmlBlockElements && name != "li"
 
-                if (isCurrentTagBlockElement && !isCurrentRichParagraphBlank) {
+                if (isCurrentTagBlockElement) {
+                    val currentPara = richParagraphList.lastOrNull()
+                    if (currentPara != null && currentPara.children.isNotEmpty()) {
+                        val lastSpan = currentPara.children.lastOrNull()
+                        if (lastSpan != null && lastSpan.text == "\u2028" && lastSpan.children.isEmpty()) {
+                            currentPara.children.removeLast()
+                        }
+                    }
+                }
+
+                val isCurrentRichParagraphBlank = richParagraphList.lastOrNull()?.isBlank() == true
+
+                if (isCurrentTagBlockElement) {
                     stringBuilder.append(' ')
 
                     val newParagraph = RichParagraph(paragraphStyle = resolveParagraphStyle(openedTags))
 
                     richParagraphList.add(newParagraph)
 
-                    toKeepEmptyParagraphIndexSet.add(richParagraphList.lastIndex)
+                    if (!isCurrentRichParagraphBlank) {
+                        toKeepEmptyParagraphIndexSet.add(richParagraphList.lastIndex)
+                    } else {
+                        toKeepEmptyParagraphIndexSet.add(richParagraphList.lastIndex - 1)
+                    }
 
                     currentRichSpan = null
                 }
@@ -260,9 +285,10 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
         parser.write(input)
         parser.end()
 
-        for (i in richParagraphList.lastIndex downTo 0) {
+        val initialLastIndex = richParagraphList.lastIndex
+        for (i in initialLastIndex downTo 0) {
             // Keep empty paragraphs if they are line breaks <br> or by block html elements
-            if (i in lineBreakParagraphIndexSet || (i != richParagraphList.lastIndex && i in toKeepEmptyParagraphIndexSet))
+            if (i in lineBreakParagraphIndexSet || (i != initialLastIndex && i in toKeepEmptyParagraphIndexSet))
                 continue
 
             // Remove empty paragraphs
@@ -410,19 +436,19 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                 return true
             }
 
+            // Create paragraph tag name
+            val paragraphTagName =
+                if (paragraphGroupTagName == "ol" || paragraphGroupTagName == "ul") "li"
+                else "p"
+
             // Add line break if the paragraph is empty
             if (isLineBreak()) {
                 val skipAddingBr =
                     isLastParagraphEmpty && richParagraph.isEmpty() && index == richTextState.richParagraphList.lastIndex
 
                 if (!skipAddingBr)
-                    builder.append("<p><$BrElement /></p>")
+                    builder.append("<$paragraphTagName><$BrElement /></$paragraphTagName>")
             } else {
-                // Create paragraph tag name
-                val paragraphTagName =
-                    if (paragraphGroupTagName == "ol" || paragraphGroupTagName == "ul") "li"
-                    else "p"
-
                 // Create paragraph css
                 val paragraphCssMap = CssDecoder.decodeParagraphStyleToCssStyleMap(richParagraph.paragraphStyle)
                 val paragraphCss = CssDecoder.decodeCssStyleMap(paragraphCssMap)
