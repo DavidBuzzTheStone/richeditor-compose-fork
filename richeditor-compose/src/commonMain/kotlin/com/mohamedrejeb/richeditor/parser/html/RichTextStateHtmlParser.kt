@@ -3,7 +3,6 @@ package com.mohamedrejeb.richeditor.parser.html
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
@@ -23,6 +22,7 @@ import com.mohamedrejeb.richeditor.paragraph.type.ParagraphType
 import com.mohamedrejeb.richeditor.paragraph.type.UnorderedList
 import com.mohamedrejeb.richeditor.parser.RichTextStateParser
 import com.mohamedrejeb.richeditor.parser.utils.BoldSpanStyle
+import com.mohamedrejeb.richeditor.parser.utils.DoubleUnderScoreSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.H1SpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.H2SpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.H3SpanStyle
@@ -38,7 +38,6 @@ import com.mohamedrejeb.richeditor.parser.utils.StrikethroughSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.SubscriptSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.SuperscriptSpanStyle
 import com.mohamedrejeb.richeditor.parser.utils.UnderlineSpanStyle
-import com.mohamedrejeb.richeditor.parser.utils.DoubleUnderScoreSpanStyle
 import com.mohamedrejeb.richeditor.utils.customMerge
 
 
@@ -74,9 +73,8 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                 if (lastOpenedTag == "ul" || lastOpenedTag == "ol") return@onText
 
                 if (lastOpenedTag in skippedHtmlElements) return@onText
-
+ 
                 val rawText = it
-                println("ON TEXT CALLED WITH rawText='$rawText'")
                 // 1. Hide the spacer by replacing it with a placeholder that won't be trimmed. This spacer has an important role in drawing the radical symbol.
                 val placeholder = "@@MATH_GUARD@@"
                 val protectedText = rawText.replace(sqrtSpacer, placeholder)
