@@ -73,7 +73,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                 if (lastOpenedTag == "ul" || lastOpenedTag == "ol") return@onText
 
                 if (lastOpenedTag in skippedHtmlElements) return@onText
- 
+
                 val rawText = it
                 // 1. Hide the spacer by replacing it with a placeholder that won't be trimmed. This spacer has an important role in drawing the radical symbol.
                 val placeholder = "@@MATH_GUARD@@"
@@ -231,7 +231,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                 }
             }
             .onCloseTag { name, _ ->
-                openedTags.removeLastOrNull()
+                if (openedTags.isNotEmpty()) openedTags.removeAt(openedTags.lastIndex)
 
                 val isCurrentTagBlockElement = name in htmlBlockElements && name != "li"
 
@@ -240,7 +240,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                     if (currentPara != null && currentPara.children.isNotEmpty()) {
                         val lastSpan = currentPara.children.lastOrNull()
                         if (lastSpan != null && lastSpan.text == "\u2028" && lastSpan.children.isEmpty()) {
-                            currentPara.children.removeLast()
+                            currentPara.children.removeAt(currentPara.children.lastIndex)
                         }
                     }
                 }
@@ -401,7 +401,7 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
             } else if (isCloseParagraphGroup()) {
                 // Close last paragraph group tag
                 builder.append("</$lastParagraphGroupTagName>")
-                openedListTagNames.removeLastOrNull()
+                if (openedListTagNames.isNotEmpty()) openedListTagNames.removeAt(openedListTagNames.lastIndex)
 
                 // We can move from nested level: 3 to nested level: 1,
                 // for this case we need to close more than one tag
@@ -410,8 +410,9 @@ internal object RichTextStateHtmlParser : RichTextStateParser<String> {
                     paragraphLevel < lastParagraphGroupLevel
                 ) {
                     repeat(lastParagraphGroupLevel - paragraphLevel) {
-                        openedListTagNames.removeLastOrNull()?.let {
-                            builder.append("</$it>")
+                        if (openedListTagNames.isNotEmpty()){
+                            openedListTagNames.removeAt(openedListTagNames.lastIndex)
+                                .let { builder.append("</$it>") }
                         }
                     }
                 }
