@@ -77,81 +77,24 @@ public fun MathRichTextEditor(
     // 2. State for Layout & Watchdog
     var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
-    val spacer = sqrtSpacer
-
     LaunchedEffect(Unit) {
         snapshotFlow { state.annotatedString }
             .collect { annotatedString ->
-                val spanStyles = annotatedString.spanStyles
-
-                // 1. MERGE RANGES FIRST
-                // This treats "Sqrt(x^2)" as one block, even if internal styling splits the span.
-                val mergedSqrtRanges = spanStyles.mergeRanges{ it.isSqrtMarker() }
-
-                var actionToPerform: (() -> Unit)? = null
-
-                for (range in mergedSqrtRanges) {
-                    val start = range.start
-                    val end = range.end
-                    val textLen = annotatedString.text.length
-
-                    // --- 1. START GUARD CHECK ---
-                    if (start < textLen) {
-                        val startChars = annotatedString.text.substring(
-                            start,
-                            (start + spacer.length).coerceAtMost(textLen)
-                        )
-                        if (startChars != spacer) {
-                            // Guard missing. Remove style from the WHOLE merged range.
-                            actionToPerform = {
-                                state.removeSpanStyle(SqrtSpanStyle, TextRange(start, end))
-                            }
-                            break
-                        }
+                MathGuardsProcessor.processMathGuards(
+                    annotatedString = annotatedString,
+                    onRemoveSpanStyle = { range ->
+                        state.removeSpanStyle(SqrtSpanStyle, range)
+                    },
+                    onAddSpanStyle = { range ->
+                        state.addSpanStyle(SqrtSpanStyle, range)
+                    },
+                    onUpdateSelection = { range ->
+                        state.selection = range
+                    },
+                    onAddTextAtIndex = { index, text ->
+                        state.addTextAtIndex(index, text)
                     }
-
-                    // --- 2. SWALLOWED GUARD CHECK ---
-                    // Note: Use 'spacer.length' logic to skip empty roots [StartSpacer]
-                    if (end - start > spacer.length) {
-                        val lastCharStartIndex = end - spacer.length
-                        if (lastCharStartIndex >= 0) {
-                            val tailText = annotatedString.text.substring(lastCharStartIndex, end)
-
-                            if (tailText == spacer) {
-                                // Found guard inside.
-                                // We remove the style from the TAIL only.
-                                actionToPerform = {
-                                    state.removeSpanStyle(
-                                        SqrtSpanStyle,
-                                        TextRange(start, end)
-                                    )
-                                    state.addSpanStyle(
-                                        SqrtSpanStyle,
-                                        TextRange(start, end - 1)
-                                    )
-                                    state.selection = TextRange(end - 1)
-                                }
-                                break
-                            }
-                        }
-                    }
-
-                    // --- 3. MISSING END GUARD CHECK ---
-                    if (end >= textLen) {
-                        actionToPerform = { state.addTextAtIndex(end, spacer) }
-                        break
-                    } else {
-                        val nextCharEndIndex = (end + spacer.length).coerceAtMost(textLen)
-                        val nextChars = annotatedString.text.substring(end, nextCharEndIndex)
-
-                        if (nextChars != spacer) {
-                            actionToPerform = { state.addTextAtIndex(end, spacer) }
-                            break
-                        }
-                    }
-                }
-
-                actionToPerform?.invoke()
+                )
             }
     }
 

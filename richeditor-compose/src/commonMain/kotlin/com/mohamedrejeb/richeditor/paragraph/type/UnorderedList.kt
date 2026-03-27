@@ -78,8 +78,8 @@ internal class UnorderedList private constructor(
     private fun getNewParagraphStyle() =
         ParagraphStyle(
             textIndent = TextIndent(
-                firstLine = (indent * level).sp,
-                restLine = ((indent * level) + startTextWidth.value).sp
+                firstLine = ((indent * level) - 14).sp,
+                restLine = (indent * level).sp
             )
         )
 

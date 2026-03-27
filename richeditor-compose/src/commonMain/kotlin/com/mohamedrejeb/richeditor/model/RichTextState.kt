@@ -3051,6 +3051,7 @@ public class RichTextState internal constructor(
                 startIndex + afterText.length
             ),
             spanStyle = richSpan.fullSpanStyle,
+            richSpanStyle = richSpan.fullStyle,
         )
 
         newRichParagraph.children.add(newRichSpan)
@@ -3060,7 +3061,8 @@ public class RichTextState internal constructor(
             richSpan.children.removeAt(i)
             childRichSpan.parent = newRichSpan
             childRichSpan.paragraph = newRichParagraph
-            newRichSpan.children.add(childRichSpan)
+            childRichSpan.updateChildrenParagraph(newRichParagraph)
+            newRichSpan.children.add(0, childRichSpan)
         }
 
         while (true) {
@@ -3072,8 +3074,10 @@ public class RichTextState internal constructor(
                 ((index + 1)..currentRichSpan.children.lastIndex).forEach {
                     val childRichSpan = currentRichSpan.children[it]
                     childRichSpan.spanStyle = childRichSpan.fullSpanStyle
+                    childRichSpan.richSpanStyle = childRichSpan.fullStyle
                     childRichSpan.parent = null
                     childRichSpan.paragraph = newRichParagraph
+                    childRichSpan.updateChildrenParagraph(newRichParagraph)
                     newRichParagraph.children.add(childRichSpan)
                 }
                 currentRichSpan.children.removeRange(index + 1, currentRichSpan.children.size)
@@ -3085,8 +3089,10 @@ public class RichTextState internal constructor(
             ((index + 1)..richSpan.paragraph.children.lastIndex).forEach {
                 val childRichSpan = richSpan.paragraph.children[it]
                 childRichSpan.spanStyle = childRichSpan.fullSpanStyle
+                childRichSpan.richSpanStyle = childRichSpan.fullStyle
                 childRichSpan.parent = null
                 childRichSpan.paragraph = newRichParagraph
+                childRichSpan.updateChildrenParagraph(newRichParagraph)
                 newRichParagraph.children.add(childRichSpan)
             }
             richSpan.paragraph.children.removeRange(index + 1, richSpan.paragraph.children.size)
@@ -3135,6 +3141,7 @@ public class RichTextState internal constructor(
                 startIndex + afterText.length
             ),
             spanStyle = richSpan.fullSpanStyle,
+            richSpanStyle = richSpan.fullStyle,
         )
 
         newRichSpan.children.add(afterRichSpan)
@@ -3143,7 +3150,8 @@ public class RichTextState internal constructor(
             val childRichSpan = richSpan.children[i]
             richSpan.children.removeAt(i)
             childRichSpan.parent = afterRichSpan
-            afterRichSpan.children.add(childRichSpan)
+            childRichSpan.updateChildrenParagraph(richSpan.paragraph) // Note: same paragraph
+            afterRichSpan.children.add(0, childRichSpan)
         }
 
         while (true) {
@@ -3155,7 +3163,8 @@ public class RichTextState internal constructor(
                 ((index + 1)..currentRichSpan.children.lastIndex).forEach {
                     val childRichSpan = currentRichSpan.children[it]
                     childRichSpan.spanStyle = childRichSpan.fullSpanStyle
-                    childRichSpan.parent = null
+                    childRichSpan.richSpanStyle = childRichSpan.fullStyle
+                    childRichSpan.parent = newRichSpan
                     newRichSpan.children.add(childRichSpan)
                 }
                 currentRichSpan.children.removeRange(index + 1, currentRichSpan.children.size)
@@ -3167,7 +3176,8 @@ public class RichTextState internal constructor(
             ((index + 1)..richSpan.paragraph.children.lastIndex).forEach {
                 val childRichSpan = richSpan.paragraph.children[it]
                 childRichSpan.spanStyle = childRichSpan.fullSpanStyle
-                childRichSpan.parent = null
+                childRichSpan.richSpanStyle = childRichSpan.fullStyle
+                childRichSpan.parent = newRichSpan
                 newRichSpan.children.add(childRichSpan)
             }
             richSpan.paragraph.children.removeRange(index + 1, richSpan.paragraph.children.size)
@@ -3352,10 +3362,8 @@ public class RichTextState internal constructor(
                             (end - start).absoluteValue.toSp()
                         }
 
-                    if (paragraphType.startTextWidth != distanceSp) {
-                        paragraphType.startTextWidth = distanceSp
-                        isParagraphUpdated = true
-                    }
+                    // Disabled dynamic startTextWidth as it caused infinite re-layouts/huge indents
+                    // paragraphType.startTextWidth = distanceSp
                 }
             }
         }

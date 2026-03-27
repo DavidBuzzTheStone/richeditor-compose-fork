@@ -90,7 +90,7 @@ internal class OrderedList private constructor(
     private fun getNewParagraphStyle() =
         ParagraphStyle(
             textIndent = TextIndent(
-                firstLine = ((indent * level) - startTextWidth.value).sp,
+                firstLine = ((indent * level) - 24).sp,
                 restLine = (indent * level).sp
             )
         )
