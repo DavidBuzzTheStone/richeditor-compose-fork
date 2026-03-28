@@ -22,14 +22,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import com.mohamedrejeb.richeditor.math.drawMathMarkers
-import com.mohamedrejeb.richeditor.math.isSqrtMarker
-import com.mohamedrejeb.richeditor.math.mergeRanges
 import com.mohamedrejeb.richeditor.model.RichTextState
-import com.mohamedrejeb.richeditor.parser.html.sqrtSpacer
 import com.mohamedrejeb.richeditor.parser.utils.SqrtSpanStyle
 import com.mohamedrejeb.richeditor.ui.BasicRichTextEditor
 
@@ -106,7 +102,7 @@ public fun MathRichTextEditor(
         modifier = modifier
             .defaultMinSize(
                 minWidth = OutlinedTextFieldDefaults.MinWidth,
-                minHeight = OutlinedTextFieldDefaults.MinHeight
+                //minHeight = OutlinedTextFieldDefaults.MinHeight
             ),
         enabled = enabled,
         readOnly = readOnly,

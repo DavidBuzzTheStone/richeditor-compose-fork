@@ -13,6 +13,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.geometry.Offset
@@ -31,6 +34,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import com.mohamedrejeb.richeditor.model.RichTextState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 
 /**
  * Basic composable that enables users to edit rich text via hardware or software keyboard, but provides no decorations like hint or placeholder.
@@ -212,6 +216,22 @@ public fun BasicRichTextEditor(
         state.singleParagraphMode = singleParagraph
     }
 
+    // This FocusRequester is created once per unique state object.
+    // Whenever state.requestFocusCounter changes (via state.requestFocus()),
+    // we call requester.requestFocus(), which gives the underlying BasicTextField
+    // actual keyboard focus — not just an observation-state update.
+    val focusRequester = remember(state) { FocusRequester() }
+    LaunchedEffect(state) {
+        snapshotFlow { state.requestFocusCounter }
+            // skip the initial value (0) so we only react to explicit calls
+            .collect { counter ->
+                if (counter > 0) {
+                    delay(80) // allow the new composable to attach before requesting focus
+                    focusRequester.requestFocus()
+                }
+            }
+    }
+
     if (!singleParagraph) {
         // Workaround for Android to fix a bug in BasicTextField where it doesn't select the correct text
         // when the text contains multiple paragraphs.
@@ -243,6 +263,7 @@ public fun BasicRichTextEditor(
                 state.onTextFieldValueChange(it)
             },
             modifier = modifier
+                .focusRequester(focusRequester)
                 .onPreviewKeyEvent { event ->
                     if (readOnly)
                         return@onPreviewKeyEvent false

@@ -110,6 +110,22 @@ public class RichTextState internal constructor(
 
     internal var singleParagraphMode by mutableStateOf(false)
 
+    public var onInterceptEnter: ((Int) -> Boolean)? = null
+    public var onInterceptBackspace: (() -> Boolean)? = null
+
+    /**
+     * Incrementing this counter requests that [BasicRichTextEditor] steal keyboard focus.
+     * Using a counter (rather than a boolean) ensures that two back-to-back requests
+     * are not collapsed into a no-op when they happen in the same composition pass.
+     */
+    public var requestFocusCounter: Int by mutableStateOf(0)
+        private set
+
+    /** Call this from outside composition to make the editor grab focus. */
+    public fun requestFocus(): Unit {
+        requestFocusCounter++
+    }
+
     internal var textLayoutResult: TextLayoutResult? by mutableStateOf(null)
         private set
 
@@ -1431,6 +1447,14 @@ public class RichTextState internal constructor(
             return true
         }
 
+        if (event.key == Key.Backspace && textFieldValue.selection.min == 0 && textFieldValue.selection.collapsed) {
+             if (onInterceptBackspace?.invoke() == true) return true
+        }
+
+        if (event.key == Key.Enter && !event.isShiftPressed) {
+             if (onInterceptEnter?.invoke(textFieldValue.selection.min) == true) return true
+        }
+
         if (event.key != Key.Tab)
             return false
 
@@ -1602,6 +1626,17 @@ public class RichTextState internal constructor(
      * @param newTextFieldValue the new text field value.
      */
     internal fun onTextFieldValueChange(newTextFieldValue: TextFieldValue) {
+        val isSoftBackspace = newTextFieldValue.text.length < textFieldValue.text.length && textFieldValue.selection.min == 0 && textFieldValue.selection.collapsed
+        if (isSoftBackspace) {
+             if (onInterceptBackspace?.invoke() == true) return
+        }
+        val typedCharsCount = newTextFieldValue.text.length - textFieldValue.text.length
+        if (typedCharsCount > 0) {
+            val addedText = newTextFieldValue.text.substring(textFieldValue.selection.min, textFieldValue.selection.min + typedCharsCount)
+            if (addedText == "\n") {
+                 if (onInterceptEnter?.invoke(textFieldValue.selection.min) == true) return
+            }
+        }
         tempTextFieldValue = newTextFieldValue
 
         if (tempTextFieldValue.text.length > textFieldValue.text.length)
