@@ -1,18 +1,16 @@
 package com.matura.common_core.ui.utils.RichText
 
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import com.mohamedrejeb.richeditor.parser.html.sqrtSpacer
 import com.mohamedrejeb.richeditor.parser.utils.SqrtSpanStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class MathGuardsProcessorTest {
 
     @Test
-    fun `Given SqrtSpanStyle block with missing prefix, When processMathGuards is called, Then style is removed`() {
+    fun `Given SqrtSpanStyle block with missing prefix When processMathGuards is called Then style is removed`() {
         // Given
         val text = "some text"
         val spanStyle = AnnotatedString.Range(SqrtSpanStyle, 0, text.length)
@@ -34,7 +32,7 @@ class MathGuardsProcessorTest {
     }
 
     @Test
-    fun `Given SqrtSpanStyle block with swallowed guard, When processMathGuards is called, Then style is shifted`() {
+    fun `Given SqrtSpanStyle block with swallowed guard When processMathGuards is called Then style is shifted`() {
         // Given
         val text = "$sqrtSpacer x^2 $sqrtSpacer"
         val spanStyle = AnnotatedString.Range(SqrtSpanStyle, 0, text.length)
@@ -58,7 +56,7 @@ class MathGuardsProcessorTest {
     }
 
     @Test
-    fun `Given SqrtSpanStyle block missing end guard, When processMathGuards is called, Then spacer is added at end`() {
+    fun `Given SqrtSpanStyle block missing end guard When processMathGuards is called Then spacer is added at end`() {
         // Given
         val text = "$sqrtSpacer x^2"
         val spanStyle = AnnotatedString.Range(SqrtSpanStyle, 0, text.length)
