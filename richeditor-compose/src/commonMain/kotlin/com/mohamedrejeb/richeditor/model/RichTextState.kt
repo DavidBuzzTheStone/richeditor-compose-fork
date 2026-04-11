@@ -82,7 +82,7 @@ public class RichTextState internal constructor(
 
     internal val richParagraphList = mutableStateListOf<RichParagraph>()
     internal var visualTransformation: VisualTransformation by mutableStateOf(VisualTransformation.None)
-    internal var textFieldValue by mutableStateOf(TextFieldValue())
+    public var textFieldValue: TextFieldValue by mutableStateOf(TextFieldValue())
         private set
 
     internal val inlineContentMap = mutableStateMapOf<String, InlineTextContent>()
