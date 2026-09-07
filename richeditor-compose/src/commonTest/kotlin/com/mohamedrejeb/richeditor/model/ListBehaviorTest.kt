@@ -85,4 +85,104 @@ class ListBehaviorTest {
         assertEquals(2, secondParagraphType.number)
         assertEquals(1, secondParagraphType.level)
     }
+
+    @Test
+    fun testIsCurrentListItemEmpty() {
+        val state = RichTextState(
+            listOf(
+                RichParagraph(
+                    type = OrderedList(number = 1),
+                ).also {
+                    it.children.add(
+                        RichSpan(
+                            text = "Item 1",
+                            paragraph = it,
+                        )
+                    )
+                },
+                RichParagraph(
+                    type = OrderedList(number = 2),
+                ).also {
+                    it.children.add(
+                        RichSpan(
+                            text = "",
+                            paragraph = it,
+                        )
+                    )
+                }
+            )
+        )
+
+        // Point selection to the first item (with text)
+        state.selection = TextRange(4)
+        assertTrue(state.isList)
+        assertEquals(false, state.isCurrentListItemEmpty())
+
+        // Point selection to the second item (empty)
+        state.selection = TextRange(state.annotatedString.text.length)
+        assertTrue(state.isList)
+        assertTrue(state.isCurrentListItemEmpty())
+    }
+
+    @Test
+    fun testRemoveCurrentEmptyListItemMultiItem() {
+        val state = RichTextState(
+            listOf(
+                RichParagraph(
+                    type = OrderedList(number = 1),
+                ).also {
+                    it.children.add(
+                        RichSpan(
+                            text = "Item 1",
+                            paragraph = it,
+                        )
+                    )
+                },
+                RichParagraph(
+                    type = OrderedList(number = 2),
+                ).also {
+                    it.children.add(
+                        RichSpan(
+                            text = "",
+                            paragraph = it,
+                        )
+                    )
+                }
+            )
+        )
+
+        // Point selection to the second (empty) item
+        state.selection = TextRange(state.annotatedString.text.length)
+        assertEquals(2, state.richParagraphList.size)
+
+        val removed = state.removeCurrentEmptyListItem()
+        assertTrue(removed)
+        assertEquals(1, state.richParagraphList.size)
+        assertEquals("Item 1", state.richParagraphList[0].children[0].text)
+    }
+
+    @Test
+    fun testRemoveCurrentEmptyListItemSingleItem() {
+        val state = RichTextState(
+            listOf(
+                RichParagraph(
+                    type = OrderedList(number = 1),
+                ).also {
+                    it.children.add(
+                        RichSpan(
+                            text = "",
+                            paragraph = it,
+                        )
+                    )
+                }
+            )
+        )
+
+        state.selection = TextRange(state.annotatedString.text.length)
+        val removed = state.removeCurrentEmptyListItem()
+        assertTrue(removed)
+        assertEquals(1, state.richParagraphList.size)
+        assertIsNot<OrderedList>(state.richParagraphList[0].type)
+    }
 }
+

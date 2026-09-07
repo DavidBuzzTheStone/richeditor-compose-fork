@@ -1274,6 +1274,40 @@ public class RichTextState internal constructor(
     }
 
     /**
+     * Returns whether the paragraph at [textIndex] (defaulting to [selection.min] - 1)
+     * is a list item and contains no content (ignoring the bullet/number prefix).
+     */
+    public fun isCurrentListItemEmpty(textIndex: Int = selection.min - 1): Boolean {
+        val paragraph = getRichParagraphByTextIndex(textIndex) ?: return false
+        return paragraph.type is ConfigurableListLevel && (paragraph.isEmpty() || paragraph.isBlank())
+    }
+
+    /**
+     * Removes the paragraph at [textIndex] if it is an empty list item.
+     * If it is the only paragraph in this state, clears its list type and children.
+     * Returns true if a paragraph was removed or cleared.
+     */
+    public fun removeCurrentEmptyListItem(textIndex: Int = selection.min - 1): Boolean {
+        val paragraph = getRichParagraphByTextIndex(textIndex) ?: return false
+        if (paragraph.type !is ConfigurableListLevel || (!paragraph.isEmpty() && !paragraph.isBlank())) {
+            return false
+        }
+        if (richParagraphList.size <= 1) {
+            paragraph.type = DefaultParagraph()
+            paragraph.children.clear()
+            updateRichParagraphList()
+            return true
+        }
+        val pIndex = richParagraphList.indexOf(paragraph)
+        if (pIndex != -1) {
+            richParagraphList.removeAt(pIndex)
+            updateRichParagraphList()
+            return true
+        }
+        return false
+    }
+
+    /**
      * Private/Internal methods
      */
 

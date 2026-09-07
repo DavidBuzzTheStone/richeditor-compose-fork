@@ -191,4 +191,82 @@ class RichTextStateKeyEventTest {
         assertFalse(paragraphType is OrderedList)
     }
 
+    @Test
+    fun testOnPreviewKeyEventEnterInList() = runDesktopComposeUiTest {
+        val state = RichTextState(
+            initialRichParagraphList = listOf(
+                RichParagraph(
+                    type = OrderedList(
+                        number = 1,
+                        initialLevel = 1
+                    ),
+                ).also {
+                    it.children.add(
+                        RichSpan(
+                            text = "First",
+                            paragraph = it,
+                        ),
+                    )
+                }
+            )
+        )
+
+        var interceptedCount = 0
+        state.onInterceptEnter = { cursorIndex ->
+            val textIndex = if (cursorIndex > 0) cursorIndex - 1 else -1
+            val isCurrentItemEmpty = state.isCurrentListItemEmpty(textIndex)
+            if (state.isList && !isCurrentItemEmpty) {
+                false
+            } else {
+                interceptedCount++
+                true
+            }
+        }
+
+        scene.setContent {
+            state.selection = TextRange(state.annotatedString.text.length)
+            val focusRequester = remember { FocusRequester() }
+
+            Box {
+                BasicRichTextEditor(
+                    state = state,
+                    modifier = Modifier.focusRequester(focusRequester)
+                )
+            }
+
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus()
+            }
+        }
+
+        waitForIdle()
+
+        // Press Enter on non-empty list item -> Should NOT intercept, should create 2nd list item
+        scene.sendKeyEvent(
+            keyEvent = KeyEvent(
+                type = KeyEventType.KeyDown,
+                key = Key.Enter,
+            )
+        )
+        waitForIdle()
+
+        assertEquals(0, interceptedCount)
+        assertEquals(2, state.richParagraphList.size)
+        assertEquals(true, state.isList)
+        assertEquals(true, state.isCurrentListItemEmpty())
+
+        // Press Enter on the newly created empty list item -> Should intercept!
+        scene.sendKeyEvent(
+            keyEvent = KeyEvent(
+                type = KeyEventType.KeyDown,
+                key = Key.Enter,
+            )
+        )
+        waitForIdle()
+
+        assertEquals(1, interceptedCount)
+        // Paragraph list still has 2 items because enter was intercepted (handled by block splitter)
+        assertEquals(2, state.richParagraphList.size)
+    }
 }
+
