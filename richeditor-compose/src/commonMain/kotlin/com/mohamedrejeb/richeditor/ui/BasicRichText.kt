@@ -16,6 +16,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.isSpecified
 import com.mohamedrejeb.richeditor.gesture.detectTapGestures
 import com.mohamedrejeb.richeditor.model.ImageLoader
 import com.mohamedrejeb.richeditor.model.LocalImageLoader
@@ -30,12 +32,21 @@ public fun BasicRichText(
     onTextLayout: (TextLayoutResult) -> Unit = {},
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
+    listLineHeight: TextUnit = TextUnit.Unspecified,
+    listItemSpacing: TextUnit = TextUnit.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
     visualTransformation: VisualTransformation? = null,
     imageLoader: ImageLoader = LocalImageLoader.current,
 ) {
+    if (listLineHeight.isSpecified) {
+        state.config.listLineHeight = listLineHeight
+    }
+    if (listItemSpacing.isSpecified) {
+        state.config.listItemSpacing = listItemSpacing
+    }
+
     val density = LocalDensity.current
     val uriHandler = LocalUriHandler.current
     val pointerIcon = remember {

@@ -1,7 +1,9 @@
 package com.mohamedrejeb.richeditor.model
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.TextUnit
 import com.mohamedrejeb.richeditor.paragraph.type.OrderedListStyleType
 import com.mohamedrejeb.richeditor.paragraph.type.UnorderedListStyleType
 
@@ -99,6 +101,87 @@ public class RichTextConfig internal constructor(
         }
 
     /**
+     * The line height for ordered lists.
+     */
+    public var orderedListLineHeight: TextUnit = DefaultListLineHeight
+        set(value) {
+            field = value
+            updateText()
+        }
+
+    /**
+     * The line height for unordered lists.
+     */
+    public var unorderedListLineHeight: TextUnit = DefaultListLineHeight
+        set(value) {
+            field = value
+            updateText()
+        }
+
+    /**
+     * The line height for both ordered and unordered lists.
+     *
+     * This property is a shortcut for setting both [orderedListLineHeight] and [unorderedListLineHeight].
+     */
+    public var listLineHeight: TextUnit = DefaultListLineHeight
+        get() {
+            if (orderedListLineHeight == unorderedListLineHeight)
+                field = orderedListLineHeight
+
+            return field
+        }
+        set(value) {
+            field = value
+            orderedListLineHeight = value
+            unorderedListLineHeight = value
+        }
+
+    /**
+     * The line height style for ordered lists.
+     */
+    public var orderedListLineHeightStyle: LineHeightStyle? = DefaultListLineHeightStyle
+        set(value) {
+            field = value
+            updateText()
+        }
+
+    /**
+     * The line height style for unordered lists.
+     */
+    public var unorderedListLineHeightStyle: LineHeightStyle? = DefaultListLineHeightStyle
+        set(value) {
+            field = value
+            updateText()
+        }
+
+    /**
+     * The line height style for both ordered and unordered lists.
+     *
+     * This property is a shortcut for setting both [orderedListLineHeightStyle] and [unorderedListLineHeightStyle].
+     */
+    public var listLineHeightStyle: LineHeightStyle? = DefaultListLineHeightStyle
+        get() {
+            if (orderedListLineHeightStyle == unorderedListLineHeightStyle)
+                field = orderedListLineHeightStyle
+
+            return field
+        }
+        set(value) {
+            field = value
+            orderedListLineHeightStyle = value
+            unorderedListLineHeightStyle = value
+        }
+
+    /**
+     * The spacing between consecutive list items.
+     */
+    public var listItemSpacing: TextUnit = DefaultListItemSpacing
+        set(value) {
+            field = value
+            updateText()
+        }
+
+    /**
      * Whether to preserve the style when the line is empty.
      * The line can be empty when the user deletes all the characters
      * or when the user presses `enter` to create a new line.
@@ -118,6 +201,16 @@ public class RichTextConfig internal constructor(
 }
 
 internal const val DefaultListIndent = 38
+
+internal val DefaultListLineHeight: TextUnit = TextUnit.Unspecified
+
+internal val DefaultListItemSpacing: TextUnit = TextUnit.Unspecified
+
+internal val DefaultListLineHeightStyle: LineHeightStyle =
+    LineHeightStyle(
+        alignment = LineHeightStyle.Alignment.Center,
+        trim = LineHeightStyle.Trim.None,
+    )
 
 internal val DefaultUnorderedListStyleType =
     UnorderedListStyleType.from("•", "◦", "▪")

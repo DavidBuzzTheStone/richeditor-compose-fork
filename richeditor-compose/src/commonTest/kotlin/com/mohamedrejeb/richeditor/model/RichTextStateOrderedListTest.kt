@@ -1,7 +1,12 @@
 package com.mohamedrejeb.richeditor.model
 
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import com.mohamedrejeb.richeditor.annotation.ExperimentalRichTextApi
 import com.mohamedrejeb.richeditor.paragraph.RichParagraph
 import com.mohamedrejeb.richeditor.paragraph.type.DefaultParagraph
@@ -13,6 +18,56 @@ import kotlin.test.assertIs
 
 @OptIn(ExperimentalRichTextApi::class)
 class RichTextStateOrderedListTest {
+
+    @Test
+    fun testDefaultOrderedListLineHeight() {
+        val richTextState = RichTextState()
+        assertEquals(DefaultListLineHeight, richTextState.config.orderedListLineHeight)
+        assertEquals(DefaultListLineHeightStyle, richTextState.config.orderedListLineHeightStyle)
+
+        val paragraph = RichParagraph(type = OrderedList(number = 1, config = richTextState.config))
+        val style = paragraph.type.getStyle(richTextState.config)
+        assertEquals(DefaultListLineHeight, style.lineHeight)
+    }
+
+    @Test
+    fun testDefaultListItemSpacing() {
+        val richTextState = RichTextState()
+        assertEquals(DefaultListItemSpacing, richTextState.config.listItemSpacing)
+    }
+
+    @Test
+    fun testListItemSpacingInjection() {
+        val stateWithSpacing = RichTextState(
+            listOf(
+                RichParagraph(type = OrderedList(number = 1)).also { it.children.add(RichSpan(text = "Item 1", paragraph = it)) },
+                RichParagraph(type = OrderedList(number = 2)).also { it.children.add(RichSpan(text = "Item 2", paragraph = it)) },
+            )
+        )
+        stateWithSpacing.config.listItemSpacing = 8.sp
+        stateWithSpacing.updateRichParagraphList()
+        assertEquals(3, stateWithSpacing.annotatedString.paragraphStyles.size)
+
+        val stateWithoutSpacing = RichTextState(
+            listOf(
+                RichParagraph(type = OrderedList(number = 1)).also { it.children.add(RichSpan(text = "Item 1", paragraph = it)) },
+                RichParagraph(type = OrderedList(number = 2)).also { it.children.add(RichSpan(text = "Item 2", paragraph = it)) },
+            )
+        )
+        stateWithoutSpacing.config.listItemSpacing = 0.sp
+        stateWithoutSpacing.updateRichParagraphList()
+        assertEquals(2, stateWithoutSpacing.annotatedString.paragraphStyles.size)
+    }
+
+    @Test
+    fun testCustomOrderedListLineHeight() {
+        val richTextState = RichTextState()
+        richTextState.config.orderedListLineHeight = 2.0.em
+
+        val paragraph = RichParagraph(type = OrderedList(number = 1, config = richTextState.config))
+        val style = paragraph.type.getStyle(richTextState.config)
+        assertEquals(2.0.em, style.lineHeight)
+    }
 
     @Test
     fun testDeletingTenOrderedListItems() {

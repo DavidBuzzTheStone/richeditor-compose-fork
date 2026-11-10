@@ -2,6 +2,8 @@ package com.mohamedrejeb.richeditor.model
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import com.mohamedrejeb.richeditor.annotation.ExperimentalRichTextApi
 import com.mohamedrejeb.richeditor.paragraph.RichParagraph
 import com.mohamedrejeb.richeditor.paragraph.type.DefaultParagraph
@@ -13,6 +15,43 @@ import kotlin.test.assertIs
 
 @OptIn(ExperimentalRichTextApi::class)
 class RichTextStateUnorderedListTest {
+
+    @Test
+    fun testDefaultUnorderedListLineHeight() {
+        val richTextState = RichTextState()
+        assertEquals(DefaultListLineHeight, richTextState.config.unorderedListLineHeight)
+        assertEquals(DefaultListLineHeightStyle, richTextState.config.unorderedListLineHeightStyle)
+
+        val paragraph = RichParagraph(type = UnorderedList(richTextState.config))
+        val style = paragraph.type.getStyle(richTextState.config)
+        assertEquals(DefaultListLineHeight, style.lineHeight)
+    }
+
+    @Test
+    fun testDefaultListItemSpacing() {
+        val richTextState = RichTextState()
+        assertEquals(DefaultListItemSpacing, richTextState.config.listItemSpacing)
+    }
+
+    @Test
+    fun testCustomUnorderedListLineHeight() {
+        val richTextState = RichTextState()
+        richTextState.config.unorderedListLineHeight = 2.0.em
+
+        val paragraph = RichParagraph(type = UnorderedList(richTextState.config))
+        val style = paragraph.type.getStyle(richTextState.config)
+        assertEquals(2.0.em, style.lineHeight)
+    }
+
+    @Test
+    fun testListLineHeightShortcut() {
+        val richTextState = RichTextState()
+        richTextState.config.listLineHeight = 2.2.em
+
+        assertEquals(2.2.em, richTextState.config.unorderedListLineHeight)
+        assertEquals(2.2.em, richTextState.config.orderedListLineHeight)
+        assertEquals(2.2.em, richTextState.config.listLineHeight)
+    }
 
     @Test
     fun testDefaultUnorderedListStyleType() {

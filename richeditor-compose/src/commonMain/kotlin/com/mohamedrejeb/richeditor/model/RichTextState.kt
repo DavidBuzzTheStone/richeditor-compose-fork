@@ -33,9 +33,11 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
@@ -1760,6 +1762,11 @@ public class RichTextState internal constructor(
                     return@fastForEachIndexed
                 }
 
+                val isCurrentList = richParagraph.type is OrderedList || richParagraph.type is UnorderedList
+                val nextParagraph = richParagraphList.getOrNull(i + 1)
+                val isNextList = nextParagraph?.type is OrderedList || nextParagraph?.type is UnorderedList
+                val hasListItemSpacing = !singleParagraphMode && isCurrentList && isNextList && config.listItemSpacing.isSpecified && config.listItemSpacing.value > 0
+
                 withStyle(richParagraph.paragraphStyle.merge(richParagraph.type.getStyle(config))) {
                     withStyle(richParagraph.getStartTextSpanStyle() ?: RichSpanStyle.DefaultSpanStyle) {
                         append(richParagraph.type.startText)
@@ -1780,13 +1787,30 @@ public class RichTextState internal constructor(
                             },
                         )
 
-                        if (!singleParagraphMode) {
+                        if (!singleParagraphMode && !hasListItemSpacing) {
                             // Add empty space in the end of each paragraph to fix an issue with Compose TextField
                             // that makes that last char non-selectable when having multiple paragraphs
                             if (i != richParagraphList.lastIndex && index < newText.length) {
                                 append(' ')
                                 index++
                             }
+                        }
+                    }
+                }
+
+                if (hasListItemSpacing && index < newText.length) {
+                    withStyle(
+                        ParagraphStyle(
+                            lineHeight = config.listItemSpacing,
+                            lineHeightStyle = LineHeightStyle(
+                                alignment = LineHeightStyle.Alignment.Center,
+                                trim = LineHeightStyle.Trim.Both,
+                            )
+                        )
+                    ) {
+                        withStyle(SpanStyle(fontSize = config.listItemSpacing)) {
+                            append(' ')
+                            index++
                         }
                     }
                 }
@@ -4059,6 +4083,11 @@ public class RichTextState internal constructor(
         annotatedString = buildAnnotatedString {
             var index = 0
             richParagraphList.fastForEachIndexed { i, richParagraph ->
+                val isCurrentList = richParagraph.type is OrderedList || richParagraph.type is UnorderedList
+                val nextParagraph = richParagraphList.getOrNull(i + 1)
+                val isNextList = nextParagraph?.type is OrderedList || nextParagraph?.type is UnorderedList
+                val hasListItemSpacing = !singleParagraphMode && isCurrentList && isNextList && config.listItemSpacing.isSpecified && config.listItemSpacing.value > 0
+
                 withStyle(richParagraph.paragraphStyle.merge(richParagraph.type.getStyle(config))) {
                     withStyle(
                         richParagraph.getStartTextSpanStyle() ?: RichSpanStyle.DefaultSpanStyle
@@ -4080,11 +4109,28 @@ public class RichTextState internal constructor(
                             },
                         )
 
-                        if (!singleParagraphMode) {
+                        if (!singleParagraphMode && !hasListItemSpacing) {
                             if (i != richParagraphList.lastIndex) {
                                 append(' ')
                                 index++
                             }
+                        }
+                    }
+                }
+
+                if (hasListItemSpacing) {
+                    withStyle(
+                        ParagraphStyle(
+                            lineHeight = config.listItemSpacing,
+                            lineHeightStyle = LineHeightStyle(
+                                alignment = LineHeightStyle.Alignment.Center,
+                                trim = LineHeightStyle.Trim.Both,
+                            )
+                        )
+                    ) {
+                        withStyle(SpanStyle(fontSize = config.listItemSpacing)) {
+                            append(' ')
+                            index++
                         }
                     }
                 }

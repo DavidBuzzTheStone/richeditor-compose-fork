@@ -25,6 +25,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.isSpecified
 import com.mohamedrejeb.richeditor.gesture.detectTapGestures
 import com.mohamedrejeb.richeditor.model.ImageLoader
 import com.mohamedrejeb.richeditor.model.LocalImageLoader
@@ -42,6 +44,8 @@ public fun MathRichText(
     softWrap: Boolean = true,
     color: Color = MaterialTheme.colorScheme.onBackground,
     linkColor: Color = MaterialTheme.colorScheme.tertiary,
+    listLineHeight: TextUnit = TextUnit.Unspecified,
+    listItemSpacing: TextUnit = TextUnit.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
@@ -54,6 +58,12 @@ public fun MathRichText(
     }
 
     state.config.linkColor = linkColor
+    if (listLineHeight.isSpecified) {
+        state.config.listLineHeight = listLineHeight
+    }
+    if (listItemSpacing.isSpecified) {
+        state.config.listItemSpacing = listItemSpacing
+    }
 
     // Merge it into the style for the Editor
     val mergedTextStyle = style.merge(TextStyle(color = color))
