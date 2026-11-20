@@ -253,6 +253,11 @@ public fun BasicRichTextEditor(
         }
     }
 
+    val symbolFont = LocalSymbolFontFamily.current
+    val symbolFontTransformation = remember(state.visualTransformation, symbolFont) {
+        state.visualTransformation.withSymbolFont(symbolFont)
+    }
+
     CompositionLocalProvider(LocalClipboardManager provides richClipboardManager) {
         BasicTextField(
             value = state.textFieldValue,
@@ -304,7 +309,7 @@ public fun BasicRichTextEditor(
             singleLine = singleLine,
             maxLines = maxLines,
             minLines = minLines,
-            visualTransformation = state.visualTransformation,
+            visualTransformation = symbolFontTransformation,
             onTextLayout = {
                 state.onTextLayout(
                     textLayoutResult = it,

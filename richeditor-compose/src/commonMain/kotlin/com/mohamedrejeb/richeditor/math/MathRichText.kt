@@ -31,7 +31,9 @@ import com.mohamedrejeb.richeditor.gesture.detectTapGestures
 import com.mohamedrejeb.richeditor.model.ImageLoader
 import com.mohamedrejeb.richeditor.model.LocalImageLoader
 import com.mohamedrejeb.richeditor.model.RichTextState
+import com.mohamedrejeb.richeditor.ui.LocalSymbolFontFamily
 import com.mohamedrejeb.richeditor.ui.drawRichSpanStyle
+import com.mohamedrejeb.richeditor.ui.withSymbolFont
 
 
 @Composable
@@ -70,11 +72,13 @@ public fun MathRichText(
 
     var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
+    val symbolFont = LocalSymbolFontFamily.current
     val text = remember(
         state.visualTransformation,
         state.annotatedString,
+        symbolFont,
     ) {
-        state.visualTransformation.filter(state.annotatedString).text
+        state.visualTransformation.filter(state.annotatedString).text.withSymbolFont(symbolFont)
     }
 
     CompositionLocalProvider(

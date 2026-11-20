@@ -53,13 +53,15 @@ public fun BasicRichText(
         mutableStateOf(PointerIcon.Default)
     }
 
+    val symbolFont = LocalSymbolFontFamily.current
     val text = remember(
         state.visualTransformation,
         visualTransformation,
         state.annotatedString,
+        symbolFont,
     ) {
         val baseTransformed = state.visualTransformation.filter(state.annotatedString).text
-        visualTransformation?.filter(baseTransformed)?.text ?: baseTransformed
+        (visualTransformation?.filter(baseTransformed)?.text ?: baseTransformed).withSymbolFont(symbolFont)
     }
 
     CompositionLocalProvider(
